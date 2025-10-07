@@ -42,7 +42,7 @@ class AssetLoader {
         for (const enemy of enemies) {
             for (const action of actions) {
                 const imageName = `enemy_${enemy}_${action}`;
-                const imagePath = `../assets/sprites/enemies/${enemy}/${action}.png`;
+                const imagePath = `../assets/sprites/${enemy}/${action}.png`;
                 loadPromises.push(this.loadImage(imageName, imagePath));
             }
         }
