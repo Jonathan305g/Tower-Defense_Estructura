@@ -1,10 +1,6 @@
 import GameEngine from './core/GameEngine.js';
 
-// Inicializar el juego cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    const gameEngine = new GameEngine('game-container');
-    gameEngine.start();
+    const gameContainer = document.getElementById('game-container');
+    const game = new GameEngine('game-container');
 });
-// En tu archivo principal
-const gameEngine = new GameEngine('game-container');
-gameEngine.start();

@@ -1,191 +1,228 @@
-class GameEngine {
-  constructor() {
-    this.cozys = []; // Array de Cozys activos
-    this.lastTime = 0;
-    // ... otras inicializaciones
-  }
+import AssetLoader from './AssetLoader.js';
+import PathManager from './PathManager.js';
+import Cozy from '../entities/Cozy.js';
+import UndoRedoManager from '../managers/UndoRedoManager.js';
+import CircularQueue from './structures/CircularQueue.js';
 
-  start() {
-    this.lastTime = performance.now();
-    requestAnimationFrame(this.gameLoop.bind(this));
-  }
-
-  gameLoop(currentTime) {
-    const deltaTime = (currentTime - this.lastTime) / 1000; // Convertir a segundos
-    this.lastTime = currentTime;
-
-    this.update(deltaTime);
-    this.draw();
-
-    requestAnimationFrame(this.gameLoop.bind(this));
-  }
-
-  update(deltaTime) {
-    // Actualizar cada Cozy
-    this.cozys.forEach(cozy => cozy.update(deltaTime));
-
-    // Eliminar los Cozys que llegaron al final o murieron
-    this.cozys = this.cozys.filter(cozy => !cozy.reachedEnd && cozy.hp > 0);
-  }
-
-  draw() {
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Dibujar el camino (opcional)
-    this.drawPath(ctx);
-
-    // Dibujar cada Cozy
-    this.cozys.forEach(cozy => cozy.draw(ctx));
-  }
-
-  drawPath(ctx) {
-    // Dibujar el camino como una línea que une los waypoints
-    ctx.strokeStyle = 'gray';
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(this.path[0].x, this.path[0].y);
-    for (let i = 1; i < this.path.length; i++) {
-      ctx.lineTo(this.path[i].x, this.path[i].y);
-    }
-    ctx.stroke();
-  }
-
-  // Método para agregar Cozys (por ejemplo, al inicio de una oleada)
-  addCozy(cozy) {
-    this.cozys.push(cozy);
-  }
-}
-
-// src/core/GameEngine.js
 class GameEngine {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
         this.canvas = this.createCanvas();
         this.ctx = this.canvas.getContext('2d');
-        this.lastTime = 0;
-        this.deltaTime = 0;
+        this.assetLoader = new AssetLoader();
+        this.pathManager = new PathManager();
+        this.undoRedoManager = new UndoRedoManager();
         
-        this.animationManager = new AnimationManager();
-        this.particleSystem = new ParticleSystem();
         this.cozys = [];
-        this.path = this.generatePath();
+        this.cozyQueue = new CircularQueue(50); // Cola circular para actualización de estado
+        this.waves = [];
+        this.currentWaveIndex = 0;
+        this.playerHealth = 100;
+        this.score = 0;
+        this.gold = 100;
+        
+        this.lastTime = 0;
+        this.spawnTimer = 0;
         
         this.setupEventListeners();
+        this.init();
     }
 
     createCanvas() {
         const canvas = document.createElement('canvas');
         canvas.width = 800;
         canvas.height = 600;
-        canvas.style.border = '1px solid black';
         this.container.appendChild(canvas);
         return canvas;
     }
 
-    generatePath() {
-        // Generar camino predefinido
-        return [
-            { x: -50, y: 300 },
-            { x: 200, y: 300 },
-            { x: 200, y: 150 },
-            { x: 400, y: 150 },
-            { x: 400, y: 450 },
-            { x: 600, y: 450 },
-            { x: 600, y: 300 },
-            { x: 850, y: 300 }
+    async init() {
+        this.showLoadingMessage();
+        
+        try {
+            await this.assetLoader.loadGameAssets();
+            this.setupWaves();
+            this.start();
+        } catch (error) {
+            console.error('Error cargando recursos:', error);
+            this.showErrorMessage();
+        }
+    }
+
+    showLoadingMessage() {
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = '20px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('Cargando Tower Defense...', this.canvas.width/2, this.canvas.height/2);
+    }
+
+    showErrorMessage() {
+        this.ctx.fillStyle = 'red';
+        this.ctx.font = '16px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('Error cargando recursos. Verifica la consola.', this.canvas.width/2, this.canvas.height/2);
+    }
+
+    setupWaves() {
+        this.waves = [
+            {
+                name: "Oleada 1 - Básica",
+                cozys: [
+                    { type: 'monstruo', delay: 0 },
+                    { type: 'monstruo', delay: 2 },
+                    { type: 'monstruo', delay: 4 }
+                ]
+            },
+            {
+                name: "Oleada 2 - Velocidad", 
+                cozys: [
+                    { type: 'monstruo', delay: 0 },
+                    { type: 'demonio', delay: 1 },
+                    { type: 'monstruo', delay: 2 },
+                    { type: 'demonio', delay: 3 },
+                    { type: 'mini-dragon', delay: 4 }
+                ]
+            },
+            {
+                name: "Oleada 3 - Mixta",
+                cozys: [
+                    { type: 'monstruo', delay: 0 },
+                    { type: 'demonio', delay: 0.5 },
+                    { type: 'genio', delay: 1 },
+                    { type: 'dragon', delay: 2 },
+                    { type: 'mini-dragon', delay: 1.5 },
+                    { type: 'monstruo', delay: 2.5 }
+                ]
+            }
         ];
     }
 
+    setupEventListeners() {
+        document.getElementById('undo-btn').addEventListener('click', () => {
+            this.undo();
+        });
+
+        document.getElementById('redo-btn').addEventListener('click', () => {
+            this.redo();
+        });
+    }
+
+    undo() {
+        if (this.undoRedoManager.undo()) {
+            console.log('Undo realizado');
+            this.updateUI();
+        }
+    }
+
+    redo() {
+        if (this.undoRedoManager.redo()) {
+            console.log('Redo realizado');
+            this.updateUI();
+        }
+    }
+
+    startWave() {
+        if (this.currentWaveIndex >= this.waves.length) {
+            console.log("🎉 ¡Has completado todas las oleadas!");
+            return;
+        }
+
+        const wave = this.waves[this.currentWaveIndex];
+        console.log(`🌊 Iniciando: ${wave.name}`);
+
+        wave.cozys.forEach(cozyConfig => {
+            setTimeout(() => {
+                const cozy = new Cozy(
+                    cozyConfig.type,
+                    this.pathManager.getCurrentPath(),
+                    this.assetLoader
+                );
+                this.cozys.push(cozy);
+                this.cozyQueue.enqueue(cozy); // Agregar a la cola circular
+            }, cozyConfig.delay * 1000);
+        });
+
+        this.currentWaveIndex++;
+        this.updateUI();
+    }
+
     start() {
-        this.spawnWave();
+        this.lastTime = performance.now();
+        setTimeout(() => this.startWave(), 2000);
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
     gameLoop(currentTime) {
-        this.deltaTime = (currentTime - this.lastTime) / 1000; // Convertir a segundos
+        const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
-        // Actualizar lógica del juego
-        this.update(this.deltaTime);
-        
-        // Renderizar
+        this.update(deltaTime);
         this.draw();
         
-        // Continuar el loop
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
     update(deltaTime) {
-        // Actualizar Cozys
-        this.cozys.forEach(cozy => cozy.update(deltaTime));
-        
-        // Eliminar Cozys inactivos
+        // Actualizar enemigos usando la cola circular
+        this.cozyQueue.updateAll(cozy => {
+            if (cozy.isActive) {
+                cozy.update(deltaTime);
+                
+                if (!cozy.isActive && cozy.state !== 'death') {
+                    this.playerTakeDamage(10);
+                }
+            }
+        });
+
+        // Filtrar enemigos inactivos y dar recompensas
+        const initialCount = this.cozys.length;
         this.cozys = this.cozys.filter(cozy => cozy.isActive);
         
-        // Actualizar sistema de partículas
-        this.particleSystem.update(deltaTime);
-        
-        // Spawn de nuevos Cozys si es necesario
-        if (this.cozys.length === 0) {
-            this.spawnWave();
+        if (this.cozys.length < initialCount) {
+            this.cozys.forEach(cozy => {
+                if (!cozy.isActive && cozy.state === 'death') {
+                    this.gold += cozy.reward;
+                    this.score += cozy.reward * 10;
+                }
+            });
+        }
+
+        // Iniciar siguiente oleada si es necesario
+        if (this.cozys.length === 0 && this.currentWaveIndex < this.waves.length) {
+            setTimeout(() => this.startWave(), 3000);
+        }
+
+        this.updateUI();
+    }
+
+    playerTakeDamage(damage) {
+        this.playerHealth -= damage;
+        if (this.playerHealth <= 0) {
+            this.playerHealth = 0;
+            console.log("💀 ¡Game Over!");
         }
     }
 
     draw() {
-        // Limpiar canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Dibujar camino
-        this.drawPath();
+        const background = this.assetLoader.getImage('mapa');
+        if (background) {
+            this.ctx.drawImage(background, 0, 0, this.canvas.width, this.canvas.height);
+        }
         
-        // Dibujar partículas
-        this.particleSystem.draw(this.ctx);
-        
-        // Dibujar Cozys
         this.cozys.forEach(cozy => cozy.draw(this.ctx));
-        
-        // Dibujar UI
-        this.drawUI();
     }
 
-    drawPath() {
-        this.ctx.strokeStyle = '#8B4513';
-        this.ctx.lineWidth = 40;
-        this.ctx.lineCap = 'round';
-        this.ctx.lineJoin = 'round';
+    updateUI() {
+        document.getElementById('health').textContent = this.playerHealth;
+        document.getElementById('gold').textContent = this.gold;
+        document.getElementById('wave').textContent = `${this.currentWaveIndex}/${this.waves.length}`;
         
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.path[0].x, this.path[0].y);
-        
-        for (let i = 1; i < this.path.length; i++) {
-            this.ctx.lineTo(this.path[i].x, this.path[i].y);
-        }
-        
-        this.ctx.stroke();
-        
-        // Borde del camino
-        this.ctx.strokeStyle = '#654321';
-        this.ctx.lineWidth = 2;
-        this.ctx.stroke();
-    }
-
-    spawnWave() {
-        const waveTypes = ['basic', 'fast', 'tank'];
-        
-        for (let i = 0; i < 5; i++) {
-            setTimeout(() => {
-                const type = waveTypes[Math.floor(Math.random() * waveTypes.length)];
-                const cozy = new Cozy(type, this.path, this.animationManager);
-                cozy.particleSystem = this.particleSystem;
-                this.cozys.push(cozy);
-            }, i * 1000); // Spawn cada segundo
-        }
-    }
-
-    drawUI() {
-        this.ctx.fillStyle = 'white';
-        this.ctx.font = '16px Arial';
-        this.ctx.fillText(`Cozys activos: ${this.cozys.length}`, 10, 20);
+        // Actualizar estados de botones undo/redo
+        document.getElementById('undo-btn').disabled = !this.undoRedoManager.canUndo();
+        document.getElementById('redo-btn').disabled = !this.undoRedoManager.canRedo();
     }
 }
+
+export default GameEngine;

@@ -1,0 +1,65 @@
+body {
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: white;
+}
+
+#game-container {
+    text-align: center;
+}
+
+h1 {
+    color: #4ECDC4;
+    margin-bottom: 10px;
+}
+
+.instructions {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    max-width: 800px;
+}
+
+.game-ui {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.stats span {
+    margin: 0 10px;
+    font-weight: bold;
+}
+
+.controls button {
+    padding: 8px 15px;
+    margin: 0 5px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.controls button:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+canvas {
+    border: 2px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+/* Add this to your styles/index.css for testing */
+canvas {
+  border: 2px solid red; /* This will make the canvas visible */
+}

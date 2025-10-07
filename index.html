@@ -2,14 +2,30 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Cozy Tower Defense</title>
-    <link rel="stylesheet" href="./src/styles/index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Defense - Cozy Enemies</title>
+    <link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
     <div id="game-container">
-        <!-- Interfaz será renderizada aquí -->
+        <h1>🏰 Tower Defense - Cozy Enemies</h1>
+        <div class="instructions">
+            <p>🎯 <strong>Objetivo:</strong> Defiende tu base de los enemigos "Cozy"</p>
+            <p>👹 <strong>Enemigos:</strong> monstruo, demonio, genio, dragon, mini-dragon</p>
+            <p>⏳ Las oleadas comienzan automáticamente</p>
+        </div>
+        <div class="game-ui">
+            <div class="stats">
+                <span>Salud: <span id="health">100</span></span>
+                <span>Oro: <span id="gold">100</span></span>
+                <span>Oleada: <span id="wave">1</span></span>
+            </div>
+            <div class="controls">
+                <button id="undo-btn">↶ Deshacer</button>
+                <button id="redo-btn">↷ Rehacer</button>
+            </div>
+        </div>
     </div>
-    <script type="module" src="./src/index.js"></script>
-    
+    <script type="module" src="src/index.js"></script>
 </body>
 </html>

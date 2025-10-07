@@ -1,39 +1,44 @@
-// src/managers/UndoRedoManager.js
+import Stack from '../core/structures/Stack.js';
+
 class UndoRedoManager {
-  constructor() {
-    this.undoStack = new Stack(); // Acciones realizadas
-    this.redoStack = new Stack(); // Acciones deshechas
-  }
-
-  placeTower(tower) {
-    // Lógica de colocación
-    this.undoStack.push({
-      type: 'PLACE_TOWER',
-      tower: tower
-    });
-    this.redoStack = new Stack(); // Limpiar redo al hacer nueva acción
-  }
-
-  undo() {
-    if (!this.undoStack.isEmpty()) {
-      const action = this.undoStack.pop();
-      this.redoStack.push(action);
-      // Revertir la acción
-      if (action.type === 'PLACE_TOWER') {
-        // Remover la torre del juego
-        gameWorld.removeTower(action.tower);
-      }
+    constructor() {
+        this.undoStack = new Stack();
+        this.redoStack = new Stack();
     }
-  }
 
-  redo() {
-    if (!this.redoStack.isEmpty()) {
-      const action = this.redoStack.pop();
-      this.undoStack.push(action);
-      // Reaplicar la acción
-      if (action.type === 'PLACE_TOWER') {
-        gameWorld.placeTower(action.tower);
-      }
+    execute(command) {
+        command.execute();
+        this.undoStack.push(command);
+        this.redoStack = new Stack(); // Limpiar redo stack al hacer nueva acción
     }
-  }
+
+    undo() {
+        if (!this.undoStack.isEmpty()) {
+            const command = this.undoStack.pop();
+            command.undo();
+            this.redoStack.push(command);
+            return true;
+        }
+        return false;
+    }
+
+    redo() {
+        if (!this.redoStack.isEmpty()) {
+            const command = this.redoStack.pop();
+            command.execute();
+            this.undoStack.push(command);
+            return true;
+        }
+        return false;
+    }
+
+    canUndo() {
+        return !this.undoStack.isEmpty();
+    }
+
+    canRedo() {
+        return !this.redoStack.isEmpty();
+    }
 }
+
+export default UndoRedoManager;
