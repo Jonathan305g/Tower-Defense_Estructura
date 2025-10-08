@@ -197,10 +197,10 @@ body {
 }
 
 #game-canvas {
-    background: #1a1a2e;
     display: block;
-    max-width: 100%;
-    max-height: 100%;
+    margin: 0 auto;
+    border: 2px solid #333;
+    background: #222;
 }
 
 /* Overlays */

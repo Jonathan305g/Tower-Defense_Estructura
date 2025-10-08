@@ -1,109 +1,122 @@
 <!DOCTYPE html>
 <html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Juego - Tower Defense Cozy Enemies</title>
-    <link rel="stylesheet" href="./styles/index.css">
-</head>
+    <link rel="stylesheet" href="./styles/index.css" />
+  </head>
 
-<body>
+  <body>
     <div id="game-container">
-        <!-- Header del Juego -->
-        <header class="game-header">
-            <div class="game-title">
-                <h1>🏰 Tower Defense</h1>
-                <span class="subtitle">Cozy Enemies</span>
+      <!-- Header del Juego -->
+      <header class="game-header">
+        <div class="game-title">
+          <h1>🏰 Tower Defense</h1>
+          <span class="subtitle">Cozy Enemies</span>
+        </div>
+
+        <div class="game-controls">
+          <button id="pause-btn" class="control-btn">⏸️ Pausa</button>
+          <button id="menu-btn" class="control-btn">🏠 Menú</button>
+          <button id="sound-btn" class="control-btn">🔊 Sonido</button>
+        </div>
+      </header>
+
+      <!-- Área Principal del Juego -->
+      <main class="game-main">
+        <!-- Panel de Información -->
+        <aside class="game-sidebar">
+          <div class="stats-panel">
+            <div class="stat-item">
+              <span class="stat-label">Salud:</span>
+              <span id="health" class="stat-value">100</span>
             </div>
-
-            <div class="game-controls">
-                <button id="pause-btn" class="control-btn">⏸️ Pausa</button>
-                <button id="menu-btn" class="control-btn">🏠 Menú</button>
-                <button id="sound-btn" class="control-btn">🔊 Sonido</button>
+            <div class="stat-item">
+              <span class="stat-label">Oro:</span>
+              <span id="gold" class="stat-value">100</span>
             </div>
-        </header>
+            <div class="stat-item">
+              <span class="stat-label">Oleada:</span>
+              <span id="wave" class="stat-value">1/5</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Puntuación:</span>
+              <span id="score-value" class="stat-value">0</span>
+            </div>
+          </div>
 
-        <!-- Área Principal del Juego -->
-        <main class="game-main">
-            <!-- Panel de Información -->
-            <aside class="game-sidebar">
-                <div class="stats-panel">
-                    <div class="stat-item">
-                        <span class="stat-label">Salud:</span>
-                        <span id="health-value" class="stat-value">100</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Oro:</span>
-                        <span id="gold-value" class="stat-value">100</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Oleada:</span>
-                        <span id="wave-value" class="stat-value">1/5</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Puntuación:</span>
-                        <span id="score-value" class="stat-value">0</span>
-                    </div>
-                </div>
+          <!-- Panel de Torres -->
+          <div class="towers-panel">
+            <h3>🏗️ Torres Disponibles</h3>
+            <div class="towers-list">
+              <div class="tower-item" data-tower="basic">
+                <span class="tower-icon">⚔️</span>
+                <span class="tower-name">Básica</span>
+                <span class="tower-cost">50</span>
+              </div>
+              <div class="tower-item" data-tower="rapid">
+                <span class="tower-icon">🎯</span>
+                <span class="tower-name">Rápida</span>
+                <span class="tower-cost">75</span>
+              </div>
+              <div class="tower-item" data-tower="powerful">
+                <span class="tower-icon">💥</span>
+                <span class="tower-name">Poderosa</span>
+                <span class="tower-cost">100</span>
+              </div>
+            </div>
+          </div>
 
-                <!-- Panel de Torres -->
-                <div class="towers-panel">
-                    <h3>🏗️ Torres Disponibles</h3>
-                    <div class="towers-list">
-                        <div class="tower-item" data-tower="basic">
-                            <span class="tower-icon">⚔️</span>
-                            <span class="tower-name">Básica</span>
-                            <span class="tower-cost">50</span>
-                        </div>
-                        <div class="tower-item" data-tower="rapid">
-                            <span class="tower-icon">🎯</span>
-                            <span class="tower-name">Rápida</span>
-                            <span class="tower-cost">75</span>
-                        </div>
-                        <div class="tower-item" data-tower="powerful">
-                            <span class="tower-icon">💥</span>
-                            <span class="tower-name">Poderosa</span>
-                            <span class="tower-cost">100</span>
-                        </div>
-                    </div>
-                </div>
+          <!-- Controles de Deshacer/Rehacer -->
+          <div class="undo-redo-panel">
+            <button id="undo-btn" class="undo-redo-btn" disabled>
+              ↶ Deshacer
+            </button>
+            <button id="redo-btn" class="undo-redo-btn" disabled>
+              ↷ Rehacer
+            </button>
+          </div>
+        </aside>
 
-                <!-- Controles de Deshacer/Rehacer -->
-                <div class="undo-redo-panel">
-                    <button id="undo-btn" class="undo-redo-btn" disabled>↶ Deshacer</button>
-                    <button id="redo-btn" class="undo-redo-btn" disabled>↷ Rehacer</button>
-                </div>
-            </aside>
+        <!-- Área de Juego (el motor insertará aquí el canvas) -->
+        <section id="game-area" class="game-area">
+          <!-- Overlay de Pausa -->
+          <div id="pause-overlay" class="overlay hidden">
+            <div class="overlay-content">
+              <h2>⏸️ Juego Pausado</h2>
+              <button id="resume-btn" class="btn btn-primary">Continuar</button>
+              <button id="restart-btn" class="btn btn-secondary">
+                Reiniciar
+              </button>
+              <button id="quit-btn" class="btn btn-secondary">
+                Salir al Menú
+              </button>
+            </div>
+          </div>
 
-            <!-- Canvas del Juego -->
-            <section class="game-area">
-                <canvas id="game-canvas" width="800" height="600"></canvas>
-
-                <!-- Overlay de Pausa -->
-                <div id="pause-overlay" class="overlay hidden">
-                    <div class="overlay-content">
-                        <h2>⏸️ Juego Pausado</h2>
-                        <button id="resume-btn" class="btn btn-primary">Continuar</button>
-                        <button id="restart-btn" class="btn btn-secondary">Reiniciar</button>
-                        <button id="quit-btn" class="btn btn-secondary">Salir al Menú</button>
-                    </div>
-                </div>
-
-                <!-- Overlay de Game Over -->
-                <div id="gameover-overlay" class="overlay hidden">
-                    <div class="overlay-content">
-                        <h2>💀 Game Over</h2>
-                        <p>Tu puntuación final: <span id="final-score">0</span></p>
-                        <button id="restart-game-btn" class="btn btn-primary">Jugar de Nuevo</button>
-                        <button id="menu-game-btn" class="btn btn-secondary">Menú Principal</button>
-                    </div>
-                </div>
-            </section>
-        </main>
+          <!-- Overlay de Game Over -->
+          <div id="gameover-overlay" class="overlay hidden">
+            <div class="overlay-content">
+              <h2>💀 Game Over</h2>
+              <p>Tu puntuación final: <span id="final-score">0</span></p>
+              <button id="restart-game-btn" class="btn btn-primary">
+                Jugar de Nuevo
+              </button>
+              <button id="menu-game-btn" class="btn btn-secondary">
+                Menú Principal
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
-    <script type="module" src="./src/game.js"></script>
-</body>
-
+    <!-- Entrada única del juego -->
+    <script type="module">
+      import GameEngine from "./src/core/GameEngine.js";
+      // Inserta el canvas dentro de #game-area
+      new GameEngine("game-area");
+    </script>
+  </body>
 </html>

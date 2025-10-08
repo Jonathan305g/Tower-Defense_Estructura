@@ -1,106 +1,109 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tower Defense - Cozy Enemies</title>
-    <link rel="stylesheet" href="./styles/home.css">
-</head>
-<body>
+    <link rel="stylesheet" href="./styles/home.css" />
+  </head>
+  <body>
     <div id="home-container">
-        <!-- Header -->
-        <header class="home-header">
-            <h1>🏰 Tower Defense</h1>
-            <h2>Cozy Enemies</h2>
-        </header>
+      <!-- Header -->
+      <header class="home-header">
+        <h1>🏰 Tower Defense</h1>
+        <h2>Cozy Enemies</h2>
+      </header>
 
-        <!-- Contenido Principal -->
-        <main class="home-main">
-            <!-- Sección de Información -->
-            <section class="game-info">
-                <div class="info-card">
-                    <h3>🎯 Objetivo</h3>
-                    <p>Defiende tu base de los enemigos "Cozy" colocando torres estratégicamente</p>
-                </div>
-                
-                <div class="info-card">
-                    <h3>👹 Enemigos</h3>
-                    <ul class="enemies-list">
-                        <li>🐲 Monstruo - Básico</li>
-                        <li>😈 Demonio - Veloz</li>
-                        <li>🧞 Genio - Mágico</li>
-                        <li>🐉 Dragón - Tanque</li>
-                        <li>🐲 Mini-Dragón - Veloz</li>
-                    </ul>
-                </div>
+      <!-- Contenido Principal -->
+      <main class="home-main">
+        <!-- Sección de Información -->
+        <section class="game-info">
+          <div class="info-card">
+            <h3>🎯 Objetivo</h3>
+            <p>
+              Defiende tu base de los enemigos "Cozy" colocando torres
+              estratégicamente
+            </p>
+          </div>
 
-                <div class="info-card">
-                    <h3>🎮 Controles</h3>
-                    <ul class="controls-list">
-                        <li>🖱️ Clic: Colocar torres</li>
-                        <li>↶ Deshacer: Eliminar última torre</li>
-                        <li>↷ Rehacer: Restaurar torre</li>
-                    </ul>
-                </div>
-            </section>
+          <div class="info-card">
+            <h3>👹 Enemigos</h3>
+            <ul class="enemies-list">
+              <li>🐲 Monstruo - Básico</li>
+              <li>😈 Demonio - Veloz</li>
+              <li>🧞 Genio - Mágico</li>
+              <li>🐉 Dragón - Tanque</li>
+              <li>🐲 Mini-Dragón - Veloz</li>
+            </ul>
+          </div>
 
-            <!-- Botones de Acción -->
-            <section class="action-buttons">
-                <button id="start-game" class="btn btn-primary">
-                    🚀 Iniciar Juego
-                </button>
-                
-                <button id="select-level" class="btn btn-secondary">
-                    📊 Seleccionar Nivel
-                </button>
+          <div class="info-card">
+            <h3>🎮 Controles</h3>
+            <ul class="controls-list">
+              <li>🖱️ Clic: Colocar torres</li>
+              <li>↶ Deshacer: Eliminar última torre</li>
+              <li>↷ Rehacer: Restaurar torre</li>
+            </ul>
+          </div>
+        </section>
 
-                <button id="show-instructions" class="btn btn-secondary">
-                    ❓ Instrucciones
-                </button>
-            </section>
-        </main>
+        <!-- Botones de Acción -->
+        <section class="action-buttons">
+          <button id="start-game" class="btn btn-primary">
+            🚀 Iniciar Juego
+          </button>
 
-        <!-- Footer -->
-        <footer class="home-footer">
-            <p>⏳ Las oleadas comienzan automáticamente</p>
-        </footer>
+          <button id="select-level" class="btn btn-secondary">
+            📊 Seleccionar Nivel
+          </button>
+
+          <button id="show-instructions" class="btn btn-secondary">
+            ❓ Instrucciones
+          </button>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="home-footer">
+        <p>⏳ Las oleadas comienzan automáticamente</p>
+      </footer>
     </div>
 
     <!-- Modal de Instrucciones -->
     <div id="instructions-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>📋 Instrucciones del Juego</h2>
-            <div class="instructions-content">
-                <h3>🎯 Cómo Jugar</h3>
-                <ol>
-                    <li>Coloca torres estratégicamente en el camino</li>
-                    <li>Cada torre tiene un rango y daño diferente</li>
-                    <li>Los Cozys siguen el camino predefinido</li>
-                    <li>Si un Cozy llega al final, pierdes salud</li>
-                    <li>Elimina Cozys para ganar oro y puntos</li>
-                    <li>Usa el oro para comprar más torres</li>
-                </ol>
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>📋 Instrucciones del Juego</h2>
+        <div class="instructions-content">
+          <h3>🎯 Cómo Jugar</h3>
+          <ol>
+            <li>Coloca torres estratégicamente en el camino</li>
+            <li>Cada torre tiene un rango y daño diferente</li>
+            <li>Los Cozys siguen el camino predefinido</li>
+            <li>Si un Cozy llega al final, pierdes salud</li>
+            <li>Elimina Cozys para ganar oro y puntos</li>
+            <li>Usa el oro para comprar más torres</li>
+          </ol>
 
-                <h3>🎮 Controles</h3>
-                <ul>
-                    <li><strong>Clic izquierdo:</strong> Colocar torre</li>
-                    <li><strong>Deshacer (↶):</strong> Eliminar última torre</li>
-                    <li><strong>Rehacer (↷):</strong> Restaurar torre eliminada</li>
-                    <li><strong>Espacio:</strong> Pausar el juego</li>
-                </ul>
+          <h3>🎮 Controles</h3>
+          <ul>
+            <li><strong>Clic izquierdo:</strong> Colocar torre</li>
+            <li><strong>Deshacer (↶):</strong> Eliminar última torre</li>
+            <li><strong>Rehacer (↷):</strong> Restaurar torre eliminada</li>
+            <li><strong>Espacio:</strong> Pausar el juego</li>
+          </ul>
 
-                <h3>🏆 Estrategias</h3>
-                <ul>
-                    <li>Coloca torres en curvas del camino</li>
-                    <li>Combina torres de diferente alcance</li>
-                    <li>Mejora torres existentes en lugar de construir nuevas</li>
-                    <li>Prioriza enemigos con más salud</li>
-                </ul>
-            </div>
+          <h3>🏆 Estrategias</h3>
+          <ul>
+            <li>Coloca torres en curvas del camino</li>
+            <li>Combina torres de diferente alcance</li>
+            <li>Mejora torres existentes en lugar de construir nuevas</li>
+            <li>Prioriza enemigos con más salud</li>
+          </ul>
         </div>
+      </div>
     </div>
 
     <script type="module" src="./src/home.js"></script>
-</body>
+  </body>
 </html>

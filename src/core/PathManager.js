@@ -16,6 +16,8 @@ class PathManager {
         return Array.from(this.paths.keys());
     }
 
+    getCurrentPath() { return this.getPath(this.current); }
+    
     addDefaultPaths() {
         // Ruta 1 (mapa1) — usando las coordenadas provistas por el usuario
         this.addPath('ruta1', [
