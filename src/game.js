@@ -1,233 +1,108 @@
-// src/game.js - Lógica principal del juego
-import GameEngine from './core/GameEngine.js';
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Juego - Tower Defense Cozy Enemies</title>
+    <link rel="stylesheet" href="./styles/index.css" />
+  </head>
 
-class GameManager {
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
-        this.gameEngine = null;
-        this.isPaused = false;
-        
-        this.initGame();
-        this.initEventListeners();
-        console.log("🎮 Game Manager inicializado");
-    }
+  <body>
+    <div id="game-container">
+      <!-- Header del Juego -->
+      <header class="game-header">
+        <div class="game-title">
+          <h1>🏰 Tower Defense</h1>
+          <span class="subtitle">Cozy Enemies</span>
+        </div>
 
-    async initGame() {
-        try {
-            // Mostrar mensaje de carga
-            this.showLoadingMessage();
-            
-            // Inicializar el motor del juego
-            this.gameEngine = new GameEngine('game-canvas');
-            await this.gameEngine.init();
-            
-            // Ocultar mensaje de carga
-            this.hideLoadingMessage();
-            
-            // Iniciar actualización de la UI
-            this.startUIUpdate();
-            
-        } catch (error) {
-            console.error('Error al inicializar el juego:', error);
-            this.showErrorMessage('Error al cargar el juego: ' + error.message);
-        }
-    }
+        <div class="game-controls">
+          <button id="pause-btn" class="control-btn">⏸️ Pausa</button>
+          <button id="menu-btn" class="control-btn">🏠 Menú</button>
+          <button id="sound-btn" class="control-btn">🔊 Sonido</button>
+        </div>
+      </header>
 
-    initEventListeners() {
-        // Botón de pausa
-        document.getElementById('pause-btn').addEventListener('click', () => {
-            this.togglePause();
-        });
+      <!-- Área Principal del Juego -->
+      <main class="game-main">
+        <!-- Panel de Información -->
+        <aside class="game-sidebar">
+          <div class="stats-panel">
+            <div class="stat-item">
+              <span class="stat-label">Salud:</span>
+              <span id="health" class="stat-value">100</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Oro:</span>
+              <span id="gold" class="stat-value">100</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Oleada:</span>
+              <span id="wave" class="stat-value">1/5</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Puntuación:</span>
+              <span id="score-value" class="stat-value">0</span>
+            </div>
+          </div>
 
-        // Botón de menú
-        document.getElementById('menu-btn').addEventListener('click', () => {
-            this.returnToMenu();
-        });
+          <!-- Panel de Torres -->
+          <div class="towers-panel">
+            <h3>🏗️ Torres Disponibles</h3>
+            <div class="towers-list">
+              <div class="tower-item" data-tower="basic">
+                <span class="tower-icon">⚔️</span>
+                <span class="tower-name">Básica</span>
+                <span class="tower-cost">50</span>
+              </div>
+              <div class="tower-item" data-tower="rapid">
+                <span class="tower-icon">🎯</span>
+                <span class="tower-name">Rápida</span>
+                <span class="tower-cost">75</span>
+              </div>
+              <div class="tower-item" data-tower="powerful">
+                <span class="tower-icon">💥</span>
+                <span class="tower-name">Poderosa</span>
+                <span class="tower-cost">100</span>
+              </div>
+            </div>
+          </div>
 
-        // Botón de sonido
-        document.getElementById('sound-btn').addEventListener('click', () => {
-            this.toggleSound();
-        });
+          <!-- Controles de Deshacer/Rehacer -->
+          <div class="undo-redo-panel">
+            <button id="undo-btn" class="undo-redo-btn" disabled>↶ Deshacer</button>
+            <button id="redo-btn" class="undo-redo-btn" disabled>↷ Rehacer</button>
+          </div>
+        </aside>
 
-        // Botones de pausa
-        document.getElementById('resume-btn').addEventListener('click', () => {
-            this.togglePause();
-        });
+        <!-- Área de Juego (Phaser inyecta su canvas aquí) -->
+        <section id="game-area" class="game-area">
+          <!-- Overlay de Pausa -->
+          <div id="pause-overlay" class="overlay hidden">
+            <div class="overlay-content">
+              <h2>⏸️ Juego Pausado</h2>
+              <button id="resume-btn" class="btn btn-primary">Continuar</button>
+              <button id="restart-btn" class="btn btn-secondary">Reiniciar</button>
+              <button id="quit-btn" class="btn btn-secondary">Salir al Menú</button>
+            </div>
+          </div>
 
-        document.getElementById('restart-btn').addEventListener('click', () => {
-            this.restartGame();
-        });
+          <!-- Overlay de Game Over -->
+          <div id="gameover-overlay" class="overlay hidden">
+            <div class="overlay-content">
+              <h2>💀 Game Over</h2>
+              <p>Tu puntuación final: <span id="final-score">0</span></p>
+              <button id="restart-game-btn" class="btn btn-primary">Jugar de Nuevo</button>
+              <button id="menu-game-btn" class="btn btn-secondary">Menú Principal</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
 
-        document.getElementById('quit-btn').addEventListener('click', () => {
-            this.returnToMenu();
-        });
-
-        // Botones de game over
-        document.getElementById('restart-game-btn').addEventListener('click', () => {
-            this.restartGame();
-        });
-
-        document.getElementById('menu-game-btn').addEventListener('click', () => {
-            this.returnToMenu();
-        });
-
-        // Botones de deshacer/rehacer
-        document.getElementById('undo-btn').addEventListener('click', () => {
-            this.gameEngine.undo();
-        });
-
-        document.getElementById('redo-btn').addEventListener('click', () => {
-            this.gameEngine.redo();
-        });
-
-        // Selección de torres
-        document.querySelectorAll('.tower-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const towerType = e.currentTarget.dataset.tower;
-                this.selectTower(towerType);
-            });
-        });
-
-        // Teclado
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.togglePause();
-            }
-            if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                this.gameEngine.undo();
-            }
-            if (e.key === 'y' && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                this.gameEngine.redo();
-            }
-        });
-    }
-
-    togglePause() {
-        this.isPaused = !this.isPaused;
-        
-        if (this.isPaused) {
-            this.gameEngine.pause();
-            this.showPauseOverlay();
-        } else {
-            this.gameEngine.resume();
-            this.hidePauseOverlay();
-        }
-        
-        // Actualizar texto del botón
-        document.getElementById('pause-btn').textContent = 
-            this.isPaused ? '▶️ Reanudar' : '⏸️ Pausa';
-    }
-
-    toggleSound() {
-        // Implementar toggle de sonido
-        const soundBtn = document.getElementById('sound-btn');
-        const isMuted = soundBtn.textContent.includes('🔇');
-        
-        soundBtn.textContent = isMuted ? '🔊 Sonido' : '🔇 Mute';
-        this.gameEngine.toggleSound(!isMuted);
-    }
-
-    returnToMenu() {
-        if (confirm('¿Estás seguro de que quieres salir al menú? Se perderá el progreso actual.')) {
-            window.location.href = 'index.html';
-        }
-    }
-
-    restartGame() {
-        if (confirm('¿Estás seguro de que quieres reiniciar el juego?')) {
-            location.reload();
-        }
-    }
-
-    selectTower(towerType) {
-        if (this.gameEngine) {
-            this.gameEngine.selectTower(towerType);
-            
-            // Resaltar torre seleccionada
-            document.querySelectorAll('.tower-item').forEach(item => {
-                item.classList.remove('selected');
-            });
-            document.querySelector(`[data-tower="${towerType}"]`).classList.add('selected');
-        }
-    }
-
-    startUIUpdate() {
-        // Actualizar UI periódicamente
-        setInterval(() => {
-            if (this.gameEngine && !this.isPaused) {
-                this.updateUI();
-            }
-        }, 100);
-    }
-
-    updateUI() {
-        // Actualizar estadísticas
-        document.getElementById('health-value').textContent = this.gameEngine.playerHealth;
-        document.getElementById('gold-value').textContent = this.gameEngine.gold;
-        document.getElementById('wave-value').textContent = `${this.gameEngine.currentWaveIndex}/${this.gameEngine.waves.length}`;
-        document.getElementById('score-value').textContent = this.gameEngine.score;
-
-        // Actualizar botones de deshacer/rehacer
-        document.getElementById('undo-btn').disabled = !this.gameEngine.canUndo();
-        document.getElementById('redo-btn').disabled = !this.gameEngine.canRedo();
-
-        // Actualizar estado de las torres (coste, disponibilidad)
-        document.querySelectorAll('.tower-item').forEach(item => {
-            const towerType = item.dataset.tower;
-            const cost = this.getTowerCost(towerType);
-            const canAfford = this.gameEngine.gold >= cost;
-            
-            item.querySelector('.tower-cost').textContent = cost;
-            item.style.opacity = canAfford ? '1' : '0.5';
-        });
-
-        // Verificar game over
-        if (this.gameEngine.playerHealth <= 0) {
-            this.showGameOver();
-        }
-    }
-
-    getTowerCost(towerType) {
-        const costs = {
-            'basic': 50,
-            'rapid': 75,
-            'powerful': 100
-        };
-        return costs[towerType] || 50;
-    }
-
-    showPauseOverlay() {
-        document.getElementById('pause-overlay').classList.remove('hidden');
-    }
-
-    hidePauseOverlay() {
-        document.getElementById('pause-overlay').classList.add('hidden');
-    }
-
-    showGameOver() {
-        document.getElementById('final-score').textContent = this.gameEngine.score;
-        document.getElementById('gameover-overlay').classList.remove('hidden');
-    }
-
-    showLoadingMessage() {
-        // Podrías implementar un overlay de carga
-        console.log("🔄 Cargando juego...");
-    }
-
-    hideLoadingMessage() {
-        console.log("✅ Juego cargado");
-    }
-
-    showErrorMessage(message) {
-        alert(message);
-    }
-}
-
-// Inicializar el juego cuando se cargue la página
-document.addEventListener('DOMContentLoaded', () => {
-    new GameManager('game-container');
-});
-
-export default GameManager;
+    <!-- 1) Librería Phaser (global window.Phaser) -->
+    <script src="./vendor/phaser/phaser.min.js"></script>
+    <!-- 2) Tu entrada del juego (usa el wrapper en src/phaser.js) -->
+    <script type="module" src="./src/game.js"></script>
+  </body>
+</html>

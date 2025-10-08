@@ -143,30 +143,78 @@ class GameEngine {
     }
   }
 
-  startWave() {
-    if (this.currentWaveIndex >= this.waves.length) {
-      console.log("🎉 ¡Has completado todas las oleadas!");
-      return;
-    }
+  // Spawnea UN enemigo (objeto) y programa el siguiente a los 2s
+_spawnCozy(cozyConfig) {
+  // 1) Entidad lógica (objeto Cozy)
+  const cozy = new Cozy(
+    cozyConfig.type,
+    this.pathManager.getCurrentPath(),
+    this.assetLoader
+  );
+  this.cozys.push(cozy);
+  this.cozyQueue.enqueue(cozy); // sigue usando tu cola circular
 
-    const wave = this.waves[this.currentWaveIndex];
-    console.log(`🌊 Iniciando: ${wave.name}`);
+  const intervalSeconds = 2;                   // tu intervalo entre spawns
+  const startOffset = Math.floor(speed * 10); 
 
-    wave.cozys.forEach((cozyConfig) => {
-      setTimeout(() => {
-        const cozy = new Cozy(
-          cozyConfig.type,
-          this.pathManager.getCurrentPath(),
-          this.assetLoader
-        );
-        this.cozys.push(cozy);
-        this.cozyQueue.enqueue(cozy); // Agregar a la cola circular
-      }, cozyConfig.delay * 1000);
+  // 2) Representación visual en Phaser (si está disponible)
+  if (this.phaserGame) {
+    const routeName = this.pathManager.current || "ruta1";
+    const speed = this.enemySpeed[cozyConfig.type] ?? 90;
+
+    spawnEnemyOnPath(this.phaserGame, cozyConfig.type, routeName, {
+      speed,
+      scale: cozyConfig.type === "dragon" ? 1.2 : (cozyConfig.type === "mini-dragon" ? 0.9 : 1),
+      action: "walk"
     });
-
-    this.currentWaveIndex++;
-    this.updateUI();
   }
+}
+
+render(dt) {
+  const ctx = this.ctx;
+
+  // 🔧 Limpia TODO el canvas en cada frame
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, this.width, this.height);
+
+  // Vuelve a dibujar el fondo/mapa
+  this.drawBackground(ctx);
+
+  // Dibuja entidades (enemigos, torres, proyectiles...)
+  if (this.enemies) {
+    for (const e of this.enemies) e.draw(ctx);
+  }
+
+  // (HUD, overlays, etc.)
+  this.drawHUD(ctx);
+}
+
+
+  startWave() {
+  if (this.currentWaveIndex >= this.waves.length) {
+    console.log("🎉 ¡Has completado todas las oleadas!");
+    return;
+  }
+
+  const wave = this.waves[this.currentWaveIndex];
+  console.log(`🌊 Iniciando: ${wave.name}`);
+
+  let i = 0;
+  const spawnNext = () => {
+    if (i >= wave.cozys.length) return;       // terminó de programar esta oleada
+    const cozyConfig = wave.cozys[i++];
+    this._spawnCozy(cozyConfig);               // crea 1 enemigo (objeto) y lo lanza
+    setTimeout(spawnNext, 5000);               // espera 5s y crea el siguiente
+  };
+
+  spawnNext();
+
+  // mantenemos tu flujo: avanzas el índice y dejas que update() dispare la siguiente oleada
+  this.currentWaveIndex++;
+  this.updateUI();
+}
+
 
   start() {
     this.lastTime = performance.now();
