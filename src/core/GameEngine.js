@@ -1,262 +1,239 @@
+import AssetLoader from './AssetLoader.js';
 import PathManager from './PathManager.js';
-import Queue from './structures/Queue.js';
-import Stack from './structures/Stack.js';
 import Cozy from '../entities/Cozy.js';
+import UndoRedoManager from '../managers/UndoRedoManager.js';
+import CircularQueue from './structures/CircularQueue.js';
 
 class GameEngine {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
-        this.width = 800;
-        this.height = 480;
-
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
-        this.canvas.className = 'game-canvas';
-        this.container.innerHTML = '';
-        this.container.appendChild(this.canvas);
-
+        this.canvas = this.createCanvas();
         this.ctx = this.canvas.getContext('2d');
+        this.assetLoader = new AssetLoader();
         this.pathManager = new PathManager();
-
-        this.paused = false;
-
-        // Estado del juego
-        this.playerHealth = 20;
-        this.gold = 100;
-        this.score = 0;
-
-        // Enemigos activos
-        this.enemies = [];
-
-        // Estructuras solicitadas: Cola para spawn y Pila para historial
-        this.spawnQueue = new Queue(); // agenda de spawns pendientes
-        this.historyStack = new Stack(); // historial de oleadas/segmentos completados
-
-        // Control de oleadas
+        this.undoRedoManager = new UndoRedoManager();
+        
+        this.cozys = [];
+        this.cozyQueue = new CircularQueue(50); // Cola circular para actualización de estado
+        this.waves = [];
         this.currentWaveIndex = 0;
-        this.waveSegments = []; // segmentos dentro de la oleada actual
-        this.activeSegment = null;
-        this.timeSinceLastSpawn = 0;
-
-        // Configurar oleadas según requerimiento
-        this.waves = this.buildWaves();
-
-        // Loop
-        this.lastTime = performance.now();
-        this._loop = this._loop.bind(this);
-        requestAnimationFrame(this._loop);
+        this.playerHealth = 100;
+        this.score = 0;
+        this.gold = 100;
+        
+        this.lastTime = 0;
+        this.spawnTimer = 0;
+        
+        this.setupEventListeners();
+        this.init();
     }
 
-    // Define las oleadas y segmentos con rutas y tipos
-    buildWaves() {
-        const ruta1 = this.pathManager.getPath('ruta1');
-        const ruta2 = this.pathManager.getPath('ruta2');
-
-        const makeBatch = (type, count, pathName) => ({ type, count, pathName });
-
-        return [
-            // Oleada 1:
-            // - ruta1: 5 monstruos, luego ruta2: 5 monstruos
-            [
-                makeBatch('monstruo', 5, 'ruta1'),
-                makeBatch('monstruo', 5, 'ruta2')
-            ],
-            // Oleada 2:
-            // - ruta1: 7 monstruos, luego ruta2: 4 monstruos y 1 genio
-            [
-                makeBatch('monstruo', 7, 'ruta1'),
-                makeBatch('monstruo', 4, 'ruta2'),
-                makeBatch('genio', 1, 'ruta2')
-            ],
-            // Oleada 3:
-            // - ruta1 y ruta2: 10 monstruos (5 y 5 alternados), luego un dragón en ruta1
-            [
-                { type: 'monstruo', count: 10, pathName: ['ruta1','ruta2'], alternate: true },
-                makeBatch('dragon', 1, 'ruta1')
-            ]
-        ];
+    createCanvas() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 600;
+        this.container.appendChild(canvas);
+        return canvas;
     }
 
-    startNextWave() {
-        if (this.currentWaveIndex >= this.waves.length) return; // no más oleadas
-
-        // Cargar segmentos de esta oleada
-        const segments = this.waves[this.currentWaveIndex];
-        this.waveSegments = [...segments]; // copia
-        this.activeSegment = null;
-        this.spawnQueue.clear();
-        this.timeSinceLastSpawn = 0;
-
-        // Comenzar primer segmento
-        this.startNextSegment();
-    }
-
-    startNextSegment() {
-        if (this.waveSegments.length === 0) {
-            // Oleada completada
-            this.historyStack.push({ wave: this.currentWaveIndex + 1, status: 'completed' });
-            this.currentWaveIndex += 1;
-            return;
-        }
-        this.activeSegment = this.waveSegments.shift();
-        this.spawnQueue.clear();
-        this.timeSinceLastSpawn = 0;
-
-        const seg = this.activeSegment;
-        const isAlt = Array.isArray(seg.pathName);
-
-        if (seg.alternate && isAlt) {
-            // Alternar rutas para 10 monstruos
-            for (let i = 0; i < seg.count; i++) {
-                const pathName = seg.pathName[i % seg.pathName.length];
-                this.spawnQueue.enqueue({ type: 'monstruo', pathName, cooldown: 0.6 });
-            }
-        } else {
-            for (let i = 0; i < seg.count; i++) {
-                this.spawnQueue.enqueue({ type: seg.type, pathName: seg.pathName, cooldown: 0.6 });
-            }
-        }
-    }
-
-    spawnFromQueue() {
-        if (this.spawnQueue.isEmpty()) return false;
-
-        const job = this.spawnQueue.dequeue();
-        const path = this.pathManager.getPath(job.pathName);
-        const stats = Cozy.statsForType(job.type);
-        const enemy = new Cozy({
-            type: job.type,
-            path,
-            speed: stats.speed,
-            hp: stats.hp
-        });
-        this.enemies.push(enemy);
-        return true;
-    }
-
-    damageEnemy(enemy, dmg) {
-        enemy.takeDamage(dmg);
-        if (!enemy.isActive) {
-            this.gold += enemy.goldReward;
-            this.score += enemy.goldReward * 2;
-        }
-    }
-
-    update(dt) {
-        // Si no hay oleada activa y no hemos llegado al final, arrancar la siguiente
-        if (!this.activeSegment && this.currentWaveIndex < this.waves.length) {
-            this.startNextWave();
-        }
-
-        // Spawning control (una unidad cada ~0.6s si hay en cola)
-        this.timeSinceLastSpawn += dt;
-        if (this.timeSinceLastSpawn >= 0.6 && !this.spawnQueue.isEmpty()) {
-            this.spawnFromQueue();
-            this.timeSinceLastSpawn = 0;
-        }
-
-        // Actualizar enemigos y verificar objetivos
-        for (const e of this.enemies) {
-            if (!e.isActive) continue;
-            e.update(dt);
-
-            // Daño básico aleatorio (simula torres)
-            if (Math.random() < 0.02) {
-                this.damageEnemy(e, 8);
-            }
-
-            // ¿Llegó a la base?
-            if (e.isActive && e.reachedGoal()) {
-                e.isActive = false;
-                this.playerHealth -= e.baseDamage;
-                if (this.playerHealth < 0) this.playerHealth = 0;
-            }
-        }
-
-        // Limpiar enemigos inactivos
-        this.enemies = this.enemies.filter(e => e.isActive);
-
-        // ¿Se completó el segmento actual? (no hay más en cola y no quedan activos de este segmento)
-        if (this.activeSegment && this.spawnQueue.isEmpty()) {
-            const anyActive = this.enemies.some(() => true);
-            if (!anyActive) {
-                // segment complete
-                this.historyStack.push({ wave: this.currentWaveIndex + 1, segment: this.activeSegment, status: 'segment_completed' });
-                this.activeSegment = null;
-                this.startNextSegment();
-            }
+    async init() {
+        this.showLoadingMessage();
+        
+        try {
+            await this.assetLoader.loadGameAssets();
+            this.setupWaves();
+            this.start();
+        } catch (error) {
+            console.error('Error cargando recursos:', error);
+            this.showErrorMessage();
         }
     }
 
     drawBackground(ctx) {
-        // Pasto
-        ctx.fillStyle = '#77b255';
-        ctx.fillRect(0, 0, this.width, this.height);
-        // Camino
-        this.pathManager.drawPaths(ctx);
+  if (this.bgImage) {
+    // Rellena todo el canvas (800×600) => las rutas quedan 1:1
+    ctx.drawImage(this.bgImage, 0, 0, this.width, this.height);
+  } else {
+    ctx.fillStyle = '#77b255';
+    ctx.fillRect(0, 0, this.width, this.height);
+  }
+  this.pathManager.drawPaths(ctx);
+}
 
-        // Base (objetivo) en el final de cada ruta
-        ctx.fillStyle = '#444';
-        for (const name of this.pathManager.getAllPathNames()) {
-            const path = this.pathManager.getPath(name);
-            const end = path[path.length - 1];
-            ctx.fillRect(end.x - 10, end.y - 10, 20, 20);
+    showLoadingMessage() {
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = '20px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('Cargando Tower Defense...', this.canvas.width/2, this.canvas.height/2);
+    }
+
+    showErrorMessage() {
+        this.ctx.fillStyle = 'red';
+        this.ctx.font = '16px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('Error cargando recursos. Verifica la consola.', this.canvas.width/2, this.canvas.height/2);
+    }
+
+    setupWaves() {
+        this.waves = [
+            {
+                name: "Oleada 1 - Básica",
+                cozys: [
+                    { type: 'monstruo', delay: 0 },
+                    { type: 'monstruo', delay: 2 },
+                    { type: 'monstruo', delay: 4 }
+                ]
+            },
+            {
+                name: "Oleada 2 - Velocidad", 
+                cozys: [
+                    { type: 'monstruo', delay: 0 },
+                    { type: 'demonio', delay: 1 },
+                    { type: 'monstruo', delay: 2 },
+                    { type: 'demonio', delay: 3 },
+                    { type: 'mini-dragon', delay: 4 }
+                ]
+            },
+            {
+                name: "Oleada 3 - Mixta",
+                cozys: [
+                    { type: 'monstruo', delay: 0 },
+                    { type: 'demonio', delay: 0.5 },
+                    { type: 'genio', delay: 1 },
+                    { type: 'dragon', delay: 2 },
+                    { type: 'mini-dragon', delay: 1.5 },
+                    { type: 'monstruo', delay: 2.5 }
+                ]
+            }
+        ];
+    }
+
+    setupEventListeners() {
+        document.getElementById('undo-btn').addEventListener('click', () => {
+            this.undo();
+        });
+
+        document.getElementById('redo-btn').addEventListener('click', () => {
+            this.redo();
+        });
+    }
+
+    undo() {
+        if (this.undoRedoManager.undo()) {
+            console.log('Undo realizado');
+            this.updateUI();
         }
     }
 
-    drawHUD(ctx) {
-        ctx.fillStyle = '#fff';
-        ctx.font = '14px monospace';
-        ctx.fillText(`❤️ Vida: ${this.playerHealth}`, 12, 20);
-        ctx.fillText(`💰 Oro: ${this.gold}`, 12, 40);
-        const totalWaves = this.waves.length;
-        ctx.fillText(`🌊 Oleada: ${Math.min(this.currentWaveIndex + (this.activeSegment ? 1 : 0), totalWaves)}/${totalWaves}`, 12, 60);
-
-        // Mostrar tamaños de cola y pila
-        ctx.fillText(`🧱 Cola spawns: ${this.spawnQueue.size()}`, 12, 80);
-        ctx.fillText(`📚 Pila historial: ${this.historyStack.size()}`, 12, 100);
-    }
-
-    render() {
-        const ctx = this.ctx;
-        ctx.clearRect(0, 0, this.width, this.height);
-        this.drawBackground(ctx);
-        // Enemigos
-        for (const e of this.enemies) {
-            e.draw(ctx);
+    redo() {
+        if (this.undoRedoManager.redo()) {
+            console.log('Redo realizado');
+            this.updateUI();
         }
-        this.drawHUD(ctx);
     }
 
-    _loop(now) {
-        const dt = Math.min(0.05, (now - this.lastTime) / 1000); // clamp dt
-        this.lastTime = now;
-        // Stop if game over
-        if (this.playerHealth <= 0) {
-            this.render();
-            this.drawGameOver();
+    startWave() {
+        if (this.currentWaveIndex >= this.waves.length) {
+            console.log("🎉 ¡Has completado todas las oleadas!");
             return;
         }
-        if (!this.paused) { this.update(dt); }
-        this.render();
-        requestAnimationFrame(this._loop);
+
+        const wave = this.waves[this.currentWaveIndex];
+        console.log(`🌊 Iniciando: ${wave.name}`);
+
+        wave.cozys.forEach(cozyConfig => {
+            setTimeout(() => {
+                const cozy = new Cozy(
+                    cozyConfig.type,
+                    this.pathManager.getCurrentPath(),
+                    this.assetLoader
+                );
+                this.cozys.push(cozy);
+                this.cozyQueue.enqueue(cozy); // Agregar a la cola circular
+            }, cozyConfig.delay * 1000);
+        });
+
+        this.currentWaveIndex++;
+        this.updateUI();
     }
 
-    drawGameOver() {
-        const ctx = this.ctx;
-        ctx.save();
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(0,0,this.width,this.height);
-        ctx.fillStyle = '#fff';
-        ctx.font = '32px sans-serif';
-        ctx.fillText('GAME OVER', this.width/2 - 100, this.height/2);
-        ctx.restore();
+    start() {
+        this.lastTime = performance.now();
+        setTimeout(() => this.startWave(), 2000);
+        requestAnimationFrame(this.gameLoop.bind(this));
     }
 
-    togglePause() { this.paused = !this.paused; }
-    setPaused(v) { this.paused = !!v; }
-    isPaused() { return this.paused; }
+    gameLoop(currentTime) {
+        const deltaTime = (currentTime - this.lastTime) / 1000;
+        this.lastTime = currentTime;
+
+        this.update(deltaTime);
+        this.draw();
+        
+        requestAnimationFrame(this.gameLoop.bind(this));
+    }
+
+    update(deltaTime) {
+        // Actualizar enemigos usando la cola circular
+        this.cozyQueue.updateAll(cozy => {
+            if (cozy.isActive) {
+                cozy.update(deltaTime);
+                
+                if (!cozy.isActive && cozy.state !== 'death') {
+                    this.playerTakeDamage(10);
+                }
+            }
+        });
+
+        // Filtrar enemigos inactivos y dar recompensas
+        const initialCount = this.cozys.length;
+        this.cozys = this.cozys.filter(cozy => cozy.isActive);
+        
+        if (this.cozys.length < initialCount) {
+            this.cozys.forEach(cozy => {
+                if (!cozy.isActive && cozy.state === 'death') {
+                    this.gold += cozy.reward;
+                    this.score += cozy.reward * 10;
+                }
+            });
+        }
+
+        // Iniciar siguiente oleada si es necesario
+        if (this.cozys.length === 0 && this.currentWaveIndex < this.waves.length) {
+            setTimeout(() => this.startWave(), 3000);
+        }
+
+        this.updateUI();
+    }
+
+    playerTakeDamage(damage) {
+        this.playerHealth -= damage;
+        if (this.playerHealth <= 0) {
+            this.playerHealth = 0;
+            console.log("💀 ¡Game Over!");
+        }
+    }
+
+    draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        const background = this.assetLoader.getImage('mapa');
+        if (background) {
+            this.ctx.drawImage(background, 0, 0, this.canvas.width, this.canvas.height);
+        }
+        
+        this.cozys.forEach(cozy => cozy.draw(this.ctx));
+    }
+
+    updateUI() {
+        document.getElementById('health').textContent = this.playerHealth;
+        document.getElementById('gold').textContent = this.gold;
+        document.getElementById('wave').textContent = `${this.currentWaveIndex}/${this.waves.length}`;
+        
+        // Actualizar estados de botones undo/redo
+        document.getElementById('undo-btn').disabled = !this.undoRedoManager.canUndo();
+        document.getElementById('redo-btn').disabled = !this.undoRedoManager.canRedo();
+    }
 }
 
 export default GameEngine;
