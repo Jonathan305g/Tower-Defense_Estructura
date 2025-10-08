@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juego - Tower Defense Cozy Enemies</title>
     <link rel="stylesheet" href="./styles/index.css">
 </head>
+
 <body>
     <div id="game-container">
         <!-- Header del Juego -->
@@ -14,7 +16,7 @@
                 <h1>🏰 Tower Defense</h1>
                 <span class="subtitle">Cozy Enemies</span>
             </div>
-            
+
             <div class="game-controls">
                 <button id="pause-btn" class="control-btn">⏸️ Pausa</button>
                 <button id="menu-btn" class="control-btn">🏠 Menú</button>
@@ -76,8 +78,8 @@
 
             <!-- Canvas del Juego -->
             <section class="game-area">
-                <canvas id="game-canvas"></canvas>
-                
+                <canvas id="game-canvas" width="800" height="600"></canvas>
+
                 <!-- Overlay de Pausa -->
                 <div id="pause-overlay" class="overlay hidden">
                     <div class="overlay-content">
@@ -103,4 +105,5 @@
 
     <script type="module" src="./src/game.js"></script>
 </body>
+
 </html>

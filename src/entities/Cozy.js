@@ -27,11 +27,11 @@ class Cozy {
         if (walkSprite) {
             this.animations.set('walk', new Animation(walkSprite, 4, 8, true)); // Cambiado de 'move' a 'walk'
         }
-        
+
         if (attackSprite) {
             this.animations.set('attack', new Animation(attackSprite, 4, 6, false));
         }
-        
+
         if (deathSprite) {
             this.animations.set('death', new Animation(deathSprite, 4, 4, false));
         }
@@ -72,14 +72,14 @@ class Cozy {
 
     setState(newState) {
         if (this.state === newState || this.state === 'death') return;
-        
+
         const currentAnimation = this.animations.get(this.state);
         if (currentAnimation) {
             currentAnimation.reset();
         }
 
         this.state = newState;
-        
+
         const newAnimation = this.animations.get(newState);
         if (newAnimation) {
             newAnimation.reset();
@@ -105,17 +105,17 @@ class Cozy {
         if (this.currentWaypointIndex < this.path.length - 1) {
             const currentWP = this.path[this.currentWaypointIndex];
             const nextWP = this.path[this.currentWaypointIndex + 1];
-            
+
             const dx = nextWP.x - currentWP.x;
             const dy = nextWP.y - currentWP.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            
+
             this.progress += (this.speed * deltaTime) / distance;
-            
+
             if (this.progress >= 1) {
                 this.currentWaypointIndex++;
                 this.progress = 0;
-                
+
                 if (this.currentWaypointIndex >= this.path.length - 1) {
                     this.reachedEnd();
                     return;
@@ -158,11 +158,11 @@ class Cozy {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
         ctx.scale(this.direction, 1);
-        
+
         ctx.drawImage(
             animation.spritesheet,
             frame.x, frame.y, frame.width, frame.height,
-            -frame.width/2, -frame.height/2, frame.width, frame.height
+            -frame.width / 2, -frame.height / 2, frame.width, frame.height
         );
 
         this.drawHealthBar(ctx);
@@ -172,17 +172,17 @@ class Cozy {
     drawFallback(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
+
         ctx.fillStyle = this.getColorByType();
         ctx.beginPath();
         ctx.arc(0, 0, 15, 0, Math.PI * 2);
         ctx.fill();
-        
+
         ctx.fillStyle = 'white';
         ctx.font = '10px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(this.type, 0, 25);
-        
+
         ctx.restore();
     }
 
@@ -190,10 +190,10 @@ class Cozy {
         const healthPercent = this.hp / this.maxHp;
         const barWidth = 30;
         const barHeight = 4;
-        
+
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(-barWidth/2, -25, barWidth, barHeight);
-        
+        ctx.fillRect(-barWidth / 2, -25, barWidth, barHeight);
+
         if (healthPercent > 0.6) {
             ctx.fillStyle = '#4CAF50';
         } else if (healthPercent > 0.3) {
@@ -201,8 +201,8 @@ class Cozy {
         } else {
             ctx.fillStyle = '#F44336';
         }
-        
-        ctx.fillRect(-barWidth/2, -25, barWidth * healthPercent, barHeight);
+
+        ctx.fillRect(-barWidth / 2, -25, barWidth * healthPercent, barHeight);
     }
 
     getColorByType() {
