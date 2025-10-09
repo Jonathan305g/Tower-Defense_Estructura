@@ -66,6 +66,30 @@ class AssetLoader {
       throw new Error("No se pudo cargar mapa1.jpg. Verifica su ubicación.");
     }
 
+    // Sprites de TORRES (usando rutas y nombres correctos)
+    const towerCandidatos = [
+      { name: "basic_tower", paths: ["./assets/torres/torresSimples/TORRESIMPLE.png", "../assets/torres/torresSimples/TORRESIMPLE.png"] },
+      { name: "advanced_tower", paths: ["./assets/torres/torresSimples/TorreBuena.png", "../assets/torres/torresSimples/TorreBuena.png"] },
+      { name: "rapid_tower", paths: ["./assets/torres/torresSimples/torreMedio.png", "../assets/torres/torresSimples/torreMedio.png"] }
+    ];
+
+    for (const tower of towerCandidatos) {
+      let cargada = false;
+      for (const ruta of tower.paths) {
+        try {
+          await this.loadImage(tower.name, ruta);
+          cargada = true;
+          console.log(`✅ Torre cargada: ${tower.name}`);
+          break;
+        } catch (e) {
+          // intenta la siguiente ruta o usa fallback
+        }
+      }
+      if (!cargada) {
+        console.log(`⚠️ Torre ${tower.name} no encontrada - usando fallback visual`);
+      }
+    }
+
     // Sprites de ENEMIGOS (mantengo tu convención)
     for (const enemy of enemies) {
       for (const action of actions) {
@@ -86,6 +110,18 @@ class AssetLoader {
 
   getEnemySprite(enemyType, action) {
     return this.getImage(`enemy_${enemyType}_${action}`);
+  }
+
+  getTowerSprite(towerType) {
+    const typeMap = {
+      'basic': 'basic_tower',
+      'rapid': 'rapid_tower', 
+      'powerful': 'advanced_tower'
+    };
+    const imageName = typeMap[towerType] || 'basic_tower';
+    const image = this.getImage(imageName);
+    // Retorna null si la imagen no existe para activar fallback
+    return image || null;
   }
 }
 

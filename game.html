@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Juego - Tower Defense Cozy Enemies</title>
     <link rel="stylesheet" href="./styles/index.css" />
+    
+    <!-- Cargar Phaser.js ANTES de nuestros módulos -->
+    <script src="./vendor/phaser/phaser.min.js"></script>
   </head>
 
   <body>
@@ -51,18 +54,33 @@
             <h3>🏗️ Torres Disponibles</h3>
             <div class="towers-list">
               <div class="tower-item" data-tower="basic">
-                <span class="tower-icon">⚔️</span>
-                <span class="tower-name">Básica</span>
+                <div class="tower-info">
+                  <span class="tower-icon">🏰</span>
+                  <div class="tower-details">
+                    <span class="tower-name">Torre Básica</span>
+                    <span class="tower-stats">Daño: 15 | Rango: 80</span>
+                  </div>
+                </div>
                 <span class="tower-cost">50</span>
               </div>
               <div class="tower-item" data-tower="rapid">
-                <span class="tower-icon">🎯</span>
-                <span class="tower-name">Rápida</span>
+                <div class="tower-info">
+                  <span class="tower-icon">🎯</span>
+                  <div class="tower-details">
+                    <span class="tower-name">Torre Rápida</span>
+                    <span class="tower-stats">Daño: 8 | Velocidad: 2.5x</span>
+                  </div>
+                </div>
                 <span class="tower-cost">75</span>
               </div>
               <div class="tower-item" data-tower="powerful">
-                <span class="tower-icon">💥</span>
-                <span class="tower-name">Poderosa</span>
+                <div class="tower-info">
+                  <span class="tower-icon">💥</span>
+                  <div class="tower-details">
+                    <span class="tower-name">Torre Poderosa</span>
+                    <span class="tower-stats">Daño: 35 | Rango: 100</span>
+                  </div>
+                </div>
                 <span class="tower-cost">100</span>
               </div>
             </div>
@@ -115,8 +133,9 @@
     <!-- Entrada única del juego -->
     <script type="module">
       import GameEngine from "./src/core/GameEngine.js";
-      // Inserta el canvas dentro de #game-area
-      new GameEngine("game-area");
+      // Inicializar el juego completo
+      const engine = new GameEngine("game-area");
+      await engine.init();
     </script>
   </body>
 </html>
