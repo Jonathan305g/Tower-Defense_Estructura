@@ -23,6 +23,7 @@ class Cozy {
     this.maxHp = this.hp;
     this.progress = 0;
     this.reward = this.getRewardByType(type);
+    this.baseDamage = this.getBaseDamageByType(type);
 
     // Verifica que el path tenga al menos un punto
     if (this.path.length > 0) {
@@ -57,11 +58,11 @@ class Cozy {
 
   getSpeedByType(type) {
     const speeds = {
-      monstruo: 1.0,
-      demonio: 1.5,
-      genio: 0.8,
-      dragon: 0.6,
-      "mini-dragon": 2.0,
+      monstruo: 20.0,
+      demonio: 8.5,
+      genio: 7.8,
+      dragon: 7.6,
+      "mini-dragon": 10.0,
     };
     return speeds[type] ?? 1.0;
   }
@@ -87,6 +88,17 @@ class Cozy {
     };
     return rewards[type] ?? 10;
   }
+
+  getBaseDamageByType(type) {
+  const dmg = {
+    monstruo: 1,
+    demonio: 1,
+    genio: 2,
+    dragon: 3,
+    "mini-dragon": 1,
+  };
+  return dmg[type] ?? 1;
+}
 
   setState(newState) {
     if (this.state === newState || this.state === "death") return;

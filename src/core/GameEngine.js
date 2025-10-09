@@ -142,7 +142,6 @@ class GameEngine {
       this.updateUI();
     }
   }
-
   // Spawnea UN enemigo (objeto) y programa el siguiente a los 2s
 _spawnCozy(cozyConfig) {
   // 1) Entidad lógica (objeto Cozy)
@@ -168,26 +167,6 @@ _spawnCozy(cozyConfig) {
       action: "walk"
     });
   }
-}
-
-render(dt) {
-  const ctx = this.ctx;
-
-  // 🔧 Limpia TODO el canvas en cada frame
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.clearRect(0, 0, this.width, this.height);
-
-  // Vuelve a dibujar el fondo/mapa
-  this.drawBackground(ctx);
-
-  // Dibuja entidades (enemigos, torres, proyectiles...)
-  if (this.enemies) {
-    for (const e of this.enemies) e.draw(ctx);
-  }
-
-  // (HUD, overlays, etc.)
-  this.drawHUD(ctx);
 }
 
 
@@ -239,7 +218,7 @@ render(dt) {
         cozy.update(deltaTime);
 
         if (!cozy.isActive && cozy.state !== "death") {
-          this.playerTakeDamage(10);
+          this.playerTakeDamage(cozy.baseDamage ?? 1);
         }
       }
     });
