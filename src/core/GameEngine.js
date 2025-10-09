@@ -267,8 +267,12 @@ _spawnCozy(cozyConfig) {
     requestAnimationFrame(this.gameLoop.bind(this));
     // attach canvas mouse handlers for tower placement
     this._attachCanvasHandlers();
-    // try to sync overlay canvas to Phaser canvas after a short delay
-    setTimeout(() => this._syncCanvasToPhaser(), 300);
+    
+    // Sincronizar canvas múltiples veces para asegurar alineación
+    setTimeout(() => this._syncCanvasToPhaser(), 100);
+    setTimeout(() => this._syncCanvasToPhaser(), 500);
+    setTimeout(() => this._syncCanvasToPhaser(), 1000);
+    
     window.addEventListener('resize', () => this._syncCanvasToPhaser());
   }
 
@@ -276,19 +280,24 @@ _spawnCozy(cozyConfig) {
     try {
       const container = document.getElementById(this.containerId);
       if (!container) return;
-      const otherCanvas = Array.from(container.querySelectorAll('canvas')).find(c => c.id !== 'game-canvas');
-      const overlay = document.getElementById('game-canvas');
-      if (!overlay) return;
-      if (otherCanvas) {
-        const rect = otherCanvas.getBoundingClientRect();
+      
+      // Encontrar el canvas de Phaser y el overlay
+      const phaserCanvas = Array.from(container.querySelectorAll('canvas')).find(c => c.id !== 'towers-overlay');
+      const overlay = document.getElementById('towers-overlay');
+      if (!overlay || !phaserCanvas) return;
+      if (phaserCanvas) {
+        const rect = phaserCanvas.getBoundingClientRect();
         const crect = container.getBoundingClientRect();
-        // position overlay relative to container
+        
+        // Sincronizar posición y tamaño exacto del overlay con Phaser
         overlay.style.left = (rect.left - crect.left) + 'px';
         overlay.style.top = (rect.top - crect.top) + 'px';
         overlay.width = Math.floor(rect.width);
         overlay.height = Math.floor(rect.height);
         overlay.style.width = Math.floor(rect.width) + 'px';
         overlay.style.height = Math.floor(rect.height) + 'px';
+        
+        console.log(`🎯 Canvas sincronizado: ${overlay.width}x${overlay.height} en posición (${overlay.style.left}, ${overlay.style.top})`);
       } else {
         // fallback: fill container
         const crect = container.getBoundingClientRect();
@@ -314,6 +323,8 @@ _spawnCozy(cozyConfig) {
       const rect = canvas.getBoundingClientRect();
       const x = ev.clientX - rect.left;
       const y = ev.clientY - rect.top;
+      
+      console.log(`🎯 Click en: (${Math.round(x)}, ${Math.round(y)}) - Canvas: ${canvas.width}x${canvas.height} - Rect: ${Math.round(rect.width)}x${Math.round(rect.height)}`);
 
       // validation
       if (!this.towerManager.canPlaceAt(x, y, this.pathManager)) {
@@ -511,36 +522,25 @@ _spawnCozy(cozyConfig) {
   }
 
   drawBackground(ctx) {
-    const bg = this.bgImage || this.assetLoader.getImage("mapa");
-    if (bg) {
-      ctx.drawImage(bg, 0, 0, this.canvas.width, this.canvas.height);
-    } else {
-      // fallback si no hay imagen
-      ctx.fillStyle = "#2c2c2c";
-      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-    // dibuja las rutas encima del fondo
-    this.pathManager.drawPaths(ctx);
+    // DESHABILITADO: Phaser maneja el fondo ahora
+    // const bg = this.bgImage || this.assetLoader.getImage("mapa");
+    // if (bg) {
+    //   ctx.drawImage(bg, 0, 0, this.canvas.width, this.canvas.height);
+    // } else {
+    //   // fallback si no hay imagen
+    //   ctx.fillStyle = "#2c2c2c";
+    //   ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    // }
+    // // dibuja las rutas encima del fondo
+    // this.pathManager.drawPaths(ctx);
   }
   
   draw() {
+    // Limpiar canvas overlay (transparente - Phaser maneja el fondo)
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    if (typeof this.drawBackground === "function") {
-      this.drawBackground(this.ctx);
-    } else {
-      // ultra-fallback (por si alguien elimina el método)
-      const background = this.assetLoader.getImage("mapa");
-      if (background) {
-        this.ctx.drawImage(
-          background,
-          0,
-          0,
-          this.canvas.width,
-          this.canvas.height
-        );
-      }
-    }
+    
+    // NO dibujar fondo aquí - Phaser ya lo maneja
+    // Solo dibujar elementos del overlay (torres, UI, etc.)
 
     this.cozys.forEach((cozy) => cozy.draw(this.ctx));
     // Draw towers
