@@ -1,17 +1,18 @@
 // src/phaser.js
 // Phaser wrapper: escena, rutas y spawns con animaciones individuales por estado.
 
-const PhaserLib = window.Phaser;
+// Función helper para obtener Phaser cuando esté disponible
+function getPhaserLib() {
+  if (typeof window !== 'undefined' && window.Phaser) {
+    return window.Phaser;
+  }
+  throw new Error('Phaser.js no está cargado. Asegúrate de incluir phaser.min.js antes que este módulo.');
+}
 
-/** ---------- CONFIG POR DEFECTO (puedes ajustarlo a tus sprites) ---------- */
-/** 
- * Estructura base por enemigo/estado:
- * - Cada estado tiene: path del asset + tipo 'sheet' o 'image' + frameWidth/Height para sheets + frames totales
- * - 'anim' define cómo reproducir (start/end/frameRate/repeat)
- */
+
 const DEFAULT_ENEMIES = {
   monstruo: {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/monstruo/walk.png',   fw: 100, fh: 100, frames: 6 },  anim: { start: 0, end: 7, frameRate: 1, repeat: -1 } },
+    walk:   { src: { type: 'sheet', path: 'assets/sprites/monstruo/walk.png',   fw: 40, fh: 40, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
     attack: { src: { type: 'sheet', path: 'assets/sprites/monstruo/attack.png', fw: 100, fh: 100, frames: 5 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
     death:  { src: { type: 'sheet', path: 'assets/sprites/monstruo/death.png',  fw: 100, fh: 100, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: 0  } },
   },
@@ -21,17 +22,17 @@ const DEFAULT_ENEMIES = {
     death:  { src: { type: 'sheet', path: 'assets/sprites/demonio/death.png',  fw: 100, fh: 100, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: 0  } },
   },
   genio: {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/genio/walk.png',   fw: 100, fh: 100, frames: 3 },  anim: { start: 0, end: 2, frameRate: 1, repeat: -1 } },
+    walk:   { src: { type: 'sheet', path: 'assets/sprites/genio/walk.png',   fw: 40, fh: 40, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
     attack: { src: { type: 'sheet', path: 'assets/sprites/genio/attack.png', fw: 100, fh: 100, frames: 4 },  anim: { start: 0, end: 3, frameRate: 1, repeat: -1 } },
     death:  { src: { type: 'sheet', path: 'assets/sprites/genio/death.png',  fw: 100, fh: 100, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: 0  } },
   },
   dragon: {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/dragon/walk.png',   fw: 120, fh: 120, frames: 5 },  anim: { start: 0, end: 4, frameRate: 1, repeat: -1 } },
+    walk:   { src: { type: 'sheet', path: 'assets/sprites/dragon/walk.png',   fw: 50,  fh: 50, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
     attack: { src: { type: 'sheet', path: 'assets/sprites/dragon/attack.png', fw: 120, fh: 120, frames: 4 },  anim: { start: 0, end: 3, frameRate: 1, repeat: -1 } },
     death:  { src: { type: 'sheet', path: 'assets/sprites/dragon/death.png',  fw: 120, fh: 120, frames: 5 },  anim: { start: 0, end: 4, frameRate: 1, repeat: 0  } },
   },
   'mini-dragon': {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/walk.png',   fw: 70, fh: 70, frames: 4 },  anim: { start: 0, end: 3, frameRate: 1, repeat: -1 } },
+    walk:   { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/walk.png',   fw: 70, fh: 70, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
     attack: { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/attack.png', fw: 70, fh: 70, frames: 3 },  anim: { start: 0, end: 2, frameRate: 1, repeat: -1 } },
     death:  { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/death.png',  fw: 70, fh: 70, frames: 4 },  anim: { start: 0, end: 3, frameRate: 1, repeat: 0  } },
   },
@@ -79,7 +80,7 @@ function pointAtDistance(pts, offset) {
 
 
 /** ---------- ESCENA PRINCIPAL ---------- */
-class MainScene extends PhaserLib.Scene {
+class MainScene extends getPhaserLib().Scene {
   constructor() {
     super('MainScene');
     this.pathsByName = {};         // { ruta1: [{x,y},...], ... }
@@ -251,55 +252,35 @@ class MainScene extends PhaserLib.Scene {
   const animKey = `${enemy}_${action}`;
 
     // Sprite en el inicio
-    const spr = this.add.sprite(start.x, start.y, animKey, 0).setOrigin(0.5, 0.5);
+    const spr = this.add.sprite(startPos.x, startPos.y, animKey, 0).setOrigin(0.5, 0.5);
     spr.setScale(scale);
     spr.play(animKey);
     spr.setData('enemy', enemy);
     spr.setData('state', action);
     this.enemiesGroup.add(spr);
 
-   // Construye timeline desde esa posición hasta el final
-  const timeline = this.tweens.createTimeline({ delay });
+   // Usar add en lugar de createTimeline para compatibilidad
+  let currentDelay = delay;
 
-  // Primer tramo: resto del segmento parcial (si aplica)
-  let startIndex = 0;
-  if (clampedOffset > 0 && startPos.remaining > 0 && startPos.segIndex >= 0) {
-    const a = points[startPos.segIndex];
-    const b = points[startPos.segIndex + 1];
-    const dur0 = Math.max((startPos.remaining / speed) * 1000, 1);
-    timeline.add({
-      targets: spr, x: b.x, y: b.y, duration: dur0, ease: 'Linear',
-      onUpdate: autoRotate ? () => {
-        const ang = Math.atan2(b.y - spr.y, b.x - spr.x);
-        spr.rotation = ang;
-        spr.flipX = (b.x - spr.x) < 0;
-      } : undefined
-    });
-    startIndex = startPos.segIndex + 1;
-  }
-
-  // Resto de segmentos completos
-  for (let i = startIndex; i < points.length - 1; i++) {
-    const a = points[i], b = points[i + 1];
-    const segLen = dist(a, b);
-    const dur = Math.max((segLen / speed) * 1000, 1);
-    timeline.add({
-      targets: spr, x: b.x, y: b.y, duration: dur, ease: 'Linear',
-      onUpdate: autoRotate ? () => {
-        const ang = Math.atan2(b.y - spr.y, b.x - spr.x);
-        spr.rotation = ang;
-        spr.flipX = (b.x - spr.x) < 0;
-      } : undefined
-    });
-  }
-
-  timeline.setCallback('onComplete', () => {
-    if (typeof opts.onArrive === 'function') opts.onArrive(spr);
-    else spr.anims.stop();
+  // Soluci´n simple: mover directamente al final de la ruta
+  const endPoint = points[points.length - 1];
+  const totalDistance = pathTotalLength(points);
+  const totalDuration = Math.max((totalDistance / speed) * 1000, 1000);
+  
+  this.tweens.add({
+    targets: spr,
+    x: endPoint.x,
+    y: endPoint.y,
+    duration: totalDuration,
+    ease: 'Linear',
+    delay: currentDelay,
+    onComplete: () => {
+      if (typeof opts.onArrive === 'function') opts.onArrive(spr);
+      else spr.anims.stop();
+    }
   });
-  timeline.play();
 
-  return { sprite: spr, timeline };
+  return { sprite: spr };
 }
 
   /**
@@ -332,9 +313,7 @@ class MainScene extends PhaserLib.Scene {
 
 /** Inicializa Phaser y retorna Game con `game.ready` (Promise) */
 export function initPhaser(containerId = 'game-area', width = 800, height = 600) {
-  if (!PhaserLib) {
-    throw new Error('Phaser no está disponible. Incluye vendor/phaser/phaser.min.js antes de este módulo.');
-  }
+  const PhaserLib = getPhaserLib();
   let resolveReady;
   const ready = new Promise(res => (resolveReady = res));
   const game = new PhaserLib.Game({

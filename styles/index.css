@@ -128,8 +128,8 @@ body {
 
 .tower-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.5rem;
     padding: 0.75rem;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
@@ -148,18 +148,48 @@ body {
     background: rgba(78, 205, 196, 0.2);
 }
 
+.tower-item.placing {
+    border-color: #74b9ff;
+    background: rgba(116, 185, 255, 0.12);
+    transform: translateX(3px);
+}
+
+.tower-item.insufficient-gold {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tower-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
 .tower-icon {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+}
+
+.tower-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
 }
 
 .tower-name {
-    flex: 1;
     font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.tower-stats {
+    font-size: 0.7rem;
+    color: #aaa;
 }
 
 .tower-cost {
     color: #FFD93D;
     font-weight: bold;
+    font-size: 0.9rem;
 }
 
 .undo-redo-panel {

@@ -46,14 +46,29 @@ class Cozy {
     const attackSprite = assetLoader.getEnemySprite(this.type, "attack");
     const deathSprite = assetLoader.getEnemySprite(this.type, "death");
 
-    // OJO: estos números deben coincidir con tu Animations.js.
-    // Si tu clase Animations usa otra firma, adapta aquí.
-    if (walkSprite)
-      this.animations.set("walk", new Animation(walkSprite, 4, 8, true));
-    if (attackSprite)
-      this.animations.set("attack", new Animation(attackSprite, 4, 6, false));
-    if (deathSprite)
-      this.animations.set("death", new Animation(deathSprite, 4, 4, false));
+    // Ajusta los frames según el tipo de enemigo
+    let walkFrames = 6; // Valor por defecto
+    if (this.type === "enemigoConMenosFrames") {
+        walkFrames = 4; // Cambia los frames a 4 si este enemigo tiene menos frames
+    }
+
+    this.animations.set('walk', new Animation(walkSprite, walkFrames, 5)); 
+    this.animations.set('attack', new Animation(attackSprite, 6, 5)); 
+    this.animations.set('death', new Animation(deathSprite, 6, 5)); 
+
+    // Inicializa la animación sin duplicación
+    this.animations.get('walk').currentFrame = 0;
+    this.animations.get('walk').frameTime = 0;
+    this.animations.get('walk').isFinished = false;
+}
+
+  update(deltaTime) {
+    if (this.state === "walk") {
+      // Only update the animation if it is not finished
+      if (!this.animations.get('walk').isFinished) {
+        this.animations.get('walk').update(deltaTime);
+      }
+    }
   }
 
   getSpeedByType(type) {

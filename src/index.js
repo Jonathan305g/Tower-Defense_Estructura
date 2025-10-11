@@ -1,7 +1,7 @@
 // src/index.js
 import GameEngine from "./core/GameEngine.js";
 
-const engine = new GameEngine("game"); // <- monta en <div id="game">
+const engine = new GameEngine("game-area"); // monta en <section id="game-area"> del HTML
 
 // init asíncrono (carga mapa y sprites)
 await engine.init();
@@ -29,3 +29,18 @@ if (spawnBtn) {
     engine.spawn(engine.selectedType);
   });
 }
+
+// --- Panel de Torres: activar modo colocación ---
+const towerItems = document.querySelectorAll('.tower-item');
+towerItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const type = item.dataset.tower || 'basic';
+    engine.placementMode = true;
+    engine.placementType = type;
+    engine.previewTower = null;
+    // visual feedback en UI
+    towerItems.forEach(i => i.classList.remove('placing'));
+    item.classList.add('placing');
+    console.log('Modo colocación:', type);
+  });
+});
