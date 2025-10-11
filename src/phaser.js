@@ -12,7 +12,11 @@ function getPhaserLib() {
 
 const DEFAULT_ENEMIES = {
   monstruo: {
+<<<<<<< HEAD
     walk:   { src: { type: 'sheet', path: 'assets/sprites/monstruo/walk.png',   fw: 40, fh: 40, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
+=======
+    walk:   { src: { type: 'sheet', path: 'assets/sprites/monstruo/walk.png',   fw: 40, fh: 40, frames: 6 },  anim: { start: 0, end: 7, frameRate: 1, repeat: -1 } },
+>>>>>>> 8ed49602eedd1118f5289aedad2a8b2e084251e2
     attack: { src: { type: 'sheet', path: 'assets/sprites/monstruo/attack.png', fw: 100, fh: 100, frames: 5 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
     death:  { src: { type: 'sheet', path: 'assets/sprites/monstruo/death.png',  fw: 100, fh: 100, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: 0  } },
   },
