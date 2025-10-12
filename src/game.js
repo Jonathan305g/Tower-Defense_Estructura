@@ -17,9 +17,14 @@
         </div>
 
         <div class="game-controls">
+          <!-- 🔹 Botón de Pausa funcional -->
           <button id="pause-btn" class="control-btn">⏸️ Pausa</button>
+
+          <!-- 🔹 Botón de menú (puede implementar más adelante) -->
           <button id="menu-btn" class="control-btn">🏠 Menú</button>
-          <button id="sound-btn" class="control-btn">🔊 Sonido</button>
+
+          <!-- ❌ Eliminado botón de sonido -->
+          <!-- <button id="sound-btn" class="control-btn">🔊 Sonido</button> -->
         </div>
       </header>
 
@@ -75,9 +80,9 @@
           </div>
         </aside>
 
-        <!-- Área de Juego (Phaser inyecta su canvas aquí) -->
+        <!-- Área de Juego -->
         <section id="game-area" class="game-area">
-          <!-- Overlay de Pausa -->
+          <!-- 🔹 Overlay de Pausa -->
           <div id="pause-overlay" class="overlay hidden">
             <div class="overlay-content">
               <h2>⏸️ Juego Pausado</h2>
@@ -100,9 +105,30 @@
       </main>
     </div>
 
-    <!-- 1) Librería Phaser (global window.Phaser) -->
+    <!-- Phaser -->
     <script src="./vendor/phaser/phaser.min.js"></script>
-    <!-- 2) Tu entrada del juego (usa el wrapper en src/phaser.js) -->
-    <script type="module" src="./src/game.js"></script>
+
+    <!-- Juego principal -->
+    <script type="module">
+      import GameEngine from './src/core/GameEngine.js';
+      const game = new GameEngine();
+      window.game = game;
+      game.start();
+
+      // 🔹 Control del botón de pausa
+      const pauseBtn = document.getElementById('pause-btn');
+      const pauseOverlay = document.getElementById('pause-overlay');
+      const resumeBtn = document.getElementById('resume-btn');
+
+      pauseBtn.addEventListener('click', () => {
+        game.togglePause();
+        pauseOverlay.classList.toggle('hidden', !game.isPaused);
+      });
+
+      resumeBtn.addEventListener('click', () => {
+        game.togglePause();
+        pauseOverlay.classList.add('hidden');
+      });
+    </script>
   </body>
 </html>

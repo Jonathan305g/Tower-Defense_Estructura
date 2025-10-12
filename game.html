@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Juego - Tower Defense Cozy Enemies</title>
     <link rel="stylesheet" href="./styles/index.css" />
-    
     <!-- Cargar Phaser.js ANTES de nuestros módulos -->
     <script src="./vendor/phaser/phaser.min.js"></script>
   </head>
@@ -22,7 +21,8 @@
         <div class="game-controls">
           <button id="pause-btn" class="control-btn">⏸️ Pausa</button>
           <button id="menu-btn" class="control-btn">🏠 Menú</button>
-          <button id="sound-btn" class="control-btn">🔊 Sonido</button>
+          <!-- ❌ Eliminado botón de sonido -->
+          <!-- <button id="sound-btn" class="control-btn">🔊 Sonido</button> -->
         </div>
       </header>
 
@@ -88,12 +88,8 @@
 
           <!-- Controles de Deshacer/Rehacer -->
           <div class="undo-redo-panel">
-            <button id="undo-btn" class="undo-redo-btn" disabled>
-              ↶ Deshacer
-            </button>
-            <button id="redo-btn" class="undo-redo-btn" disabled>
-              ↷ Rehacer
-            </button>
+            <button id="undo-btn" class="undo-redo-btn" disabled>↶ Deshacer</button>
+            <button id="redo-btn" class="undo-redo-btn" disabled>↷ Rehacer</button>
           </div>
         </aside>
 
@@ -103,13 +99,9 @@
           <div id="pause-overlay" class="overlay hidden">
             <div class="overlay-content">
               <h2>⏸️ Juego Pausado</h2>
-              <button id="resume-btn" class="btn btn-primary">Continuar</button>
-              <button id="restart-btn" class="btn btn-secondary">
-                Reiniciar
-              </button>
-              <button id="quit-btn" class="btn btn-secondary">
-                Salir al Menú
-              </button>
+              <button id="resume-btn" class="btn btn-primary">Reanudar</button>
+              <!-- <button id="restart-btn" class="btn btn-secondary">Reiniciar</button> -->
+              <!-- <button id="quit-btn" class="btn btn-secondary">Salir al Menú</button> -->
             </div>
           </div>
 
@@ -118,24 +110,21 @@
             <div class="overlay-content">
               <h2>💀 Game Over</h2>
               <p>Tu puntuación final: <span id="final-score">0</span></p>
-              <button id="restart-game-btn" class="btn btn-primary">
-                Jugar de Nuevo
-              </button>
-              <button id="menu-game-btn" class="btn btn-secondary">
-                Menú Principal
-              </button>
+              <button id="restart-game-btn" class="btn btn-primary">Jugar de Nuevo</button>
+              <button id="menu-game-btn" class="btn btn-secondary">Menú Principal</button>
             </div>
           </div>
         </section>
       </main>
     </div>
 
-    <!-- Entrada única del juego -->
+    <!-- Entrada única del juego: SIN wiring duplicado -->
     <script type="module">
       import GameEngine from "./src/core/GameEngine.js";
-      // Inicializar el juego completo
+
       const engine = new GameEngine("game-area");
-      await engine.init();
+      window.game = engine;         // útil para depurar en consola
+      await engine.init();          // dentro de init() ya se llama a connectUIControls()
     </script>
   </body>
 </html>

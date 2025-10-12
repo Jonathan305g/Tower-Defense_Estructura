@@ -74,10 +74,10 @@ class Cozy {
   getSpeedByType(type) {
     const speeds = {
       monstruo: 20.0,
-      demonio: 8.5,
-      genio: 7.8,
-      dragon: 7.6,
-      "mini-dragon": 10.0,
+      demonio: 20.0,
+      genio: 20.0,
+      dragon: 20.0,
+      "mini-dragon": 20.0,
     };
     return speeds[type] ?? 1.0;
   }

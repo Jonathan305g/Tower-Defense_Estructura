@@ -32,7 +32,7 @@ const DEFAULT_ENEMIES = {
     death:  { src: { type: 'sheet', path: 'assets/sprites/dragon/death.png',  fw: 120, fh: 120, frames: 5 },  anim: { start: 0, end: 4, frameRate: 1, repeat: 0  } },
   },
   'mini-dragon': {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/walk.png',   fw: 70, fh: 70, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
+    walk:   { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/walk.png',   fw: 70, fh: 70, frames: 5 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
     attack: { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/attack.png', fw: 70, fh: 70, frames: 3 },  anim: { start: 0, end: 2, frameRate: 1, repeat: -1 } },
     death:  { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/death.png',  fw: 70, fh: 70, frames: 4 },  anim: { start: 0, end: 3, frameRate: 1, repeat: 0  } },
   },
