@@ -12,38 +12,38 @@ function getPhaserLib() {
 
 const DEFAULT_ENEMIES = {
   monstruo: {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/monstruo/walk.png',   fw: 40, fh: 40, frames: 6 },  anim: { start: 0, end: 7, frameRate: 1, repeat: -1 } },
-    attack: { src: { type: 'sheet', path: 'assets/sprites/monstruo/attack.png', fw: 100, fh: 100, frames: 5 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
-    death:  { src: { type: 'sheet', path: 'assets/sprites/monstruo/death.png',  fw: 100, fh: 100, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: 0  } },
+    walk: { src: { type: 'sheet', path: 'assets/sprites/monstruo/walk.png', fw: 40, fh: 40, frames: 6 }, anim: { start: 0, end: 7, frameRate: 1, repeat: 2 } },
+    attack: { src: { type: 'sheet', path: 'assets/sprites/monstruo/attack.png', fw: 100, fh: 100, frames: 5 }, anim: { start: 0, end: 5, frameRate: 1, repeat: 2 } },
+    death: { src: { type: 'sheet', path: 'assets/sprites/monstruo/death.png', fw: 100, fh: 100, frames: 6 }, anim: { start: 0, end: 5, frameRate: 1, repeat: 2 } },
   },
   demonio: {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/demonio/walk.png',   fw: 100, fh: 100, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
-    attack: { src: { type: 'sheet', path: 'assets/sprites/demonio/attack.png', fw: 100, fh: 100, frames: 4 },  anim: { start: 0, end: 3, frameRate: 1, repeat: -1 } },
-    death:  { src: { type: 'sheet', path: 'assets/sprites/demonio/death.png',  fw: 100, fh: 100, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: 0  } },
+    walk: { src: { type: 'sheet', path: 'assets/sprites/demonio/walk.png', fw: 100, fh: 100, frames: 6 }, anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
+    attack: { src: { type: 'sheet', path: 'assets/sprites/demonio/attack.png', fw: 100, fh: 100, frames: 4 }, anim: { start: 0, end: 3, frameRate: 1, repeat: -1 } },
+    death: { src: { type: 'sheet', path: 'assets/sprites/demonio/death.png', fw: 100, fh: 100, frames: 6 }, anim: { start: 0, end: 5, frameRate: 1, repeat: 0 } },
   },
   genio: {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/genio/walk.png',   fw: 40, fh: 40, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
-    attack: { src: { type: 'sheet', path: 'assets/sprites/genio/attack.png', fw: 100, fh: 100, frames: 4 },  anim: { start: 0, end: 3, frameRate: 1, repeat: -1 } },
-    death:  { src: { type: 'sheet', path: 'assets/sprites/genio/death.png',  fw: 100, fh: 100, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: 0  } },
+    walk: { src: { type: 'sheet', path: 'assets/sprites/genio/walk.png', fw: 40, fh: 40, frames: 6 }, anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
+    attack: { src: { type: 'sheet', path: 'assets/sprites/genio/attack.png', fw: 100, fh: 100, frames: 4 }, anim: { start: 0, end: 3, frameRate: 1, repeat: -1 } },
+    death: { src: { type: 'sheet', path: 'assets/sprites/genio/death.png', fw: 100, fh: 100, frames: 6 }, anim: { start: 0, end: 5, frameRate: 1, repeat: 0 } },
   },
   dragon: {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/dragon/walk.png',   fw: 50,  fh: 50, frames: 6 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
-    attack: { src: { type: 'sheet', path: 'assets/sprites/dragon/attack.png', fw: 120, fh: 120, frames: 4 },  anim: { start: 0, end: 3, frameRate: 1, repeat: -1 } },
-    death:  { src: { type: 'sheet', path: 'assets/sprites/dragon/death.png',  fw: 120, fh: 120, frames: 5 },  anim: { start: 0, end: 4, frameRate: 1, repeat: 0  } },
+    walk: { src: { type: 'sheet', path: 'assets/sprites/dragon/walk.png', fw: 50, fh: 50, frames: 6 }, anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
+    attack: { src: { type: 'sheet', path: 'assets/sprites/dragon/attack.png', fw: 120, fh: 120, frames: 4 }, anim: { start: 0, end: 3, frameRate: 1, repeat: -1 } },
+    death: { src: { type: 'sheet', path: 'assets/sprites/dragon/death.png', fw: 120, fh: 120, frames: 5 }, anim: { start: 0, end: 4, frameRate: 1, repeat: 0 } },
   },
   'mini-dragon': {
-    walk:   { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/walk.png',   fw: 70, fh: 70, frames: 5 },  anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
-    attack: { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/attack.png', fw: 70, fh: 70, frames: 3 },  anim: { start: 0, end: 2, frameRate: 1, repeat: -1 } },
-    death:  { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/death.png',  fw: 70, fh: 70, frames: 4 },  anim: { start: 0, end: 3, frameRate: 1, repeat: 0  } },
+    walk: { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/walk.png', fw: 70, fh: 70, frames: 5 }, anim: { start: 0, end: 5, frameRate: 1, repeat: -1 } },
+    attack: { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/attack.png', fw: 70, fh: 70, frames: 3 }, anim: { start: 0, end: 2, frameRate: 1, repeat: -1 } },
+    death: { src: { type: 'sheet', path: 'assets/sprites/mini-dragon/death.png', fw: 70, fh: 70, frames: 4 }, anim: { start: 0, end: 3, frameRate: 1, repeat: 0 } },
   },
 };
 
 /** Packs adicionales que el usuario puede registrar en runtime (ej: idle/playing/feeding...) */
-const EXTRA_PACKS = []; 
+const EXTRA_PACKS = [];
 // Cada pack: { enemy: 'monstruo', sources: { state: {type, path, fw, fh, frames?} }, anims: [{key, start, end, frameRate, repeat}] }
 
 /** Util */
-const clampInt = (v, fallback=1) => {
+const clampInt = (v, fallback = 1) => {
   const n = Math.round(Number(v));
   return Number.isFinite(n) && n > 0 ? n : fallback;
 };
@@ -244,44 +244,44 @@ class MainScene extends getPhaserLib().Scene {
     const autoRotate = (opts.autoRotate ?? true);
     const action = (opts.action ?? 'walk');
 
-  const rawOffset = Math.max(0, opts.startOffset || 0);
-  const totalLen = pathTotalLength(points);
-  const clampedOffset = Math.min(rawOffset, Math.max(0, totalLen - 1));
-  const startPos = pointAtDistance(points, clampedOffset);
+    const rawOffset = Math.max(0, opts.startOffset || 0);
+    const totalLen = pathTotalLength(points);
+    const clampedOffset = Math.min(rawOffset, Math.max(0, totalLen - 1));
+    const startPos = pointAtDistance(points, clampedOffset);
 
-  const animKey = `${enemy}_${action}`;
+    const animKey = `${enemy}_${action}`;
 
     // Sprite en el inicio
     const spr = this.add.sprite(startPos.x, startPos.y, animKey, 0).setOrigin(0.5, 0.5);
     spr.setScale(scale);
-    spr.play(animKey);
+    spr.play({ key: animKey, frameRate: finalFrameRate, repeat: -1 });
     spr.setData('enemy', enemy);
     spr.setData('state', action);
     this.enemiesGroup.add(spr);
 
-   // Usar add en lugar de createTimeline para compatibilidad
-  let currentDelay = delay;
+    // Usar add en lugar de createTimeline para compatibilidad
+    let currentDelay = delay;
 
-  // Soluci´n simple: mover directamente al final de la ruta
-  const endPoint = points[points.length - 1];
-  const totalDistance = pathTotalLength(points);
-  const totalDuration = Math.max((totalDistance / speed) * 1000, 1000);
-  
-  this.tweens.add({
-    targets: spr,
-    x: endPoint.x,
-    y: endPoint.y,
-    duration: totalDuration,
-    ease: 'Linear',
-    delay: currentDelay,
-    onComplete: () => {
-      if (typeof opts.onArrive === 'function') opts.onArrive(spr);
-      else spr.anims.stop();
-    }
-  });
+    // Soluci´n simple: mover directamente al final de la ruta
+    const endPoint = points[points.length - 1];
+    const totalDistance = pathTotalLength(points);
+    const totalDuration = Math.max((totalDistance / speed) * 1000, 1000);
 
-  return { sprite: spr };
-}
+    this.tweens.add({
+      targets: spr,
+      x: endPoint.x,
+      y: endPoint.y,
+      duration: totalDuration,
+      ease: 'Linear',
+      delay: currentDelay,
+      onComplete: () => {
+        if (typeof opts.onArrive === 'function') opts.onArrive(spr);
+        else spr.anims.stop();
+      }
+    });
+
+    return { sprite: spr };
+  }
 
   /**
    * Spawner simple en posición fija (por si quieres estados tipo "idle" en UI).

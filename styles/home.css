@@ -32,7 +32,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: 
+    background:
         radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
@@ -41,8 +41,13 @@ body {
 }
 
 @keyframes backgroundShift {
-    0% { transform: scale(1) rotate(0deg); }
-    100% { transform: scale(1.1) rotate(1deg); }
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    100% {
+        transform: scale(1.1) rotate(1deg);
+    }
 }
 
 /* Header */
@@ -109,18 +114,21 @@ body {
     font-size: 1.3rem;
 }
 
-.enemies-list, .controls-list {
+.enemies-list,
+.controls-list {
     list-style: none;
     text-align: left;
 }
 
-.enemies-list li, .controls-list li {
+.enemies-list li,
+.controls-list li {
     padding: 0.5rem 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     transition: color 0.3s ease;
 }
 
-.enemies-list li:hover, .controls-list li:hover {
+.enemies-list li:hover,
+.controls-list li:hover {
     color: #FFD93D;
 }
 
@@ -213,6 +221,7 @@ body {
         opacity: 0;
         transform: translateY(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -242,7 +251,8 @@ body {
     margin: 1.5rem 0 1rem 0;
 }
 
-.instructions-content ol, .instructions-content ul {
+.instructions-content ol,
+.instructions-content ul {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
 }
@@ -258,6 +268,7 @@ body {
         opacity: 0;
         transform: translateY(-30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -269,6 +280,7 @@ body {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -276,8 +288,13 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* Responsive */
@@ -285,26 +302,223 @@ body {
     .home-header h1 {
         font-size: 2.5rem;
     }
-    
+
     .home-header h2 {
         font-size: 1.3rem;
     }
-    
+
     .game-info {
         grid-template-columns: 1fr;
     }
-    
+
     .action-buttons {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .btn {
         min-width: 250px;
     }
-    
+
     .modal-content {
         margin: 10% auto;
         width: 95%;
+    }
+}
+
+/* Modal de selección de niveles */
+.level-modal-content {
+    padding-top: 2rem;
+}
+
+.level-modal {
+    max-width: 900px;
+    width: 95%;
+}
+
+.levels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.level-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.level-card:hover {
+    transform: translateY(-5px);
+    border-color: #4ECDC4;
+    box-shadow: 0 10px 30px rgba(78, 205, 196, 0.3);
+}
+
+.level-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.level-header h3 {
+    color: #4ECDC4;
+    font-size: 1.2rem;
+}
+
+.level-stars {
+    color: #FFD93D;
+    font-size: 1rem;
+}
+
+.level-preview {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.level-icon {
+    font-size: 4rem;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+}
+
+.level-info {
+    margin-bottom: 1rem;
+}
+
+.level-info p {
+    margin: 0.5rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.difficulty {
+    padding: 0.2rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.difficulty.easy {
+    background: linear-gradient(45deg, #00b894, #00cec9);
+    color: white;
+}
+
+.difficulty.hard {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+}
+
+.level-enemies {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.level-enemies p {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.enemy-icons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 1.5rem;
+}
+
+.enemy-icons span {
+    transition: transform 0.3s ease;
+    cursor: help;
+}
+
+.enemy-icons span:hover {
+    transform: scale(1.2);
+}
+
+.btn-play {
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(45deg, #4ECDC4, #44A08D);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-play:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+}
+
+/* Estados de niveles bloqueados (para futuras expansiones) */
+.level-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.level-card.locked:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+}
+
+.level-card.locked .btn-play {
+    background: #555;
+    cursor: not-allowed;
+}
+
+.level-card.locked .btn-play:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* styles/home.css */
+.close-modal-level {
+    color: #fff;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    /* Asegúrate de que top y right coincidan con el diseño */
+    top: 15px;
+    /* Ajusta este valor */
+    right: 25px;
+    cursor: pointer;
+    z-index: 1010;
+    /* Aumenta el z-index para estar por encima de otros elementos */
+    transition: color 0.2s;
+}
+
+.close-modal-level:hover,
+.close-modal-level:focus {
+    color: #FF7700;
+    /* Cambia de color al pasar el mouse */
+    text-decoration: none;
+}
+
+/* Asegura que el modal-content tenga posición relativa para que el span absoluto funcione */
+.modal-content {
+    position: relative;
+    padding-top: 40px;
+}
+
+/* Responsive para el modal de niveles */
+@media (max-width: 768px) {
+    .levels-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .level-card {
+        max-width: 400px;
+        margin: 0 auto;
     }
 }

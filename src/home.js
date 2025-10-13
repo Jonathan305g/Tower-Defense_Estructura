@@ -2,100 +2,233 @@
 
 class HomeManager {
     constructor() {
-        this.modal = document.getElementById('instructions-modal');
+        this.instructionsModal = document.getElementById('instructions-modal'); // (Antiguo this.modal)
+        this.levelModal = document.getElementById('level-modal'); // NUEVO
+
+        this.levelOptions = document.querySelectorAll('.level-option'); // NUEVO
+        this.levelDisplay = document.getElementById('current-selected-level');
+
+        this.loadSelectedLevel();
         this.initEventListeners();
         console.log("🏠 Home Manager inicializado");
     }
 
+    loadSelectedLevel() {
+        const level = localStorage.getItem('selectedLevel') || '1';
+        if (this.levelDisplay) {
+            this.levelDisplay.textContent = level;
+        }
+        return level;
+    }
+
+    //Guarda el nivel seleccionado
+    saveLevel(level) {
+        localStorage.setItem('selectedLevel', level);
+        if (this.levelDisplay) {
+            this.levelDisplay.textContent = level;
+        }
+        console.log(`✅ Nivel guardado: ${level}`);
+
+        this.updateButtonStyles(level);
+        this.closeLevelModal(); // Cierra automáticamente
+    }
+
+    updateButtonStyles(currentLevel) {
+        this.levelOptions.forEach(button => {
+            if (button.dataset.level === currentLevel) {
+                // Si es el nivel actual, lo hacemos primario (pintado)
+                button.classList.remove('btn-secondary');
+                button.classList.add('btn-primary');
+            } else {
+                // Si no es el nivel actual, lo hacemos secundario (no pintado)
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-secondary');
+            }
+        });
+    }
+
+
     initEventListeners() {
-        // Botón de iniciar juego
+        // --- Botones Principales ---
+
+        // Cargar los estilos correctos al INICIO (Esta línea es crucial)
+        this.updateButtonStyles(this.loadSelectedLevel());
+
         const startButton = document.getElementById('start-game');
-        startButton.addEventListener('click', () => {
-            this.startGame();
-        });
+        if (startButton) {
+            startButton.addEventListener('click', () => {
+                this.startGame();
+            });
+        }
 
-        // Botón de seleccionar nivel
         const levelButton = document.getElementById('select-level');
-        levelButton.addEventListener('click', () => {
-            this.selectLevel();
-        });
+        if (levelButton) {
+            levelButton.addEventListener('click', () => {
+                this.selectLevel();
+            });
+        }
 
-        // Botón de instrucciones
         const instructionsButton = document.getElementById('show-instructions');
-        instructionsButton.addEventListener('click', () => {
-            this.showInstructions();
-        });
+        if (instructionsButton) {
+            instructionsButton.addEventListener('click', () => {
+                this.showInstructions();
+            });
+        }
 
-        // Cerrar modal
-        const closeModal = document.querySelector('.close-modal');
-        closeModal.addEventListener('click', () => {
-            this.closeModal();
-        });
+        // --- Cerrar Modales ---
 
-        // Cerrar modal al hacer clic fuera
+        // Cierre de modal de instrucciones
+        if (this.instructionsModal) {
+            const closeModalInstruction = this.instructionsModal.querySelector('.close-modal');
+            if (closeModalInstruction) {
+                closeModalInstruction.addEventListener('click', () => {
+                    this.closeInstructionsModal();
+                });
+            }
+        }
+
+        // Cierre de modal de nivel
+        if (this.levelModal) {
+            const closeLevelModalBtn = this.levelModal.querySelector('.close-modal-level');
+            if (closeLevelModalBtn) {
+                closeLevelModalBtn.addEventListener('click', () => {
+                    this.closeLevelModal();
+                });
+            }
+        }
+
+
+        // --- Selección de Nivel ---
+
+        // Manejar la selección de botones de nivel
+        if (this.levelOptions.length > 0) { // Comprueba que haya botones de nivel
+            this.levelOptions.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const level = event.target.dataset.level;
+                    this.saveLevel(level);
+                });
+            });
+        }
+
+
+        // --- Cierre Global de Modales ---
+
+        // Cerrar modales al hacer clic fuera
         window.addEventListener('click', (event) => {
-            if (event.target === this.modal) {
-                this.closeModal();
+            if (this.instructionsModal && event.target === this.instructionsModal) {
+                this.closeInstructionsModal();
+            }
+            if (this.levelModal && event.target === this.levelModal) {
+                this.closeLevelModal();
             }
         });
 
-        // Cerrar modal con ESC
+        // Cerrar modales con ESC
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && this.modal.style.display === 'block') {
-                this.closeModal();
+            if (event.key === 'Escape') {
+                if (this.instructionsModal && this.instructionsModal.style.display === 'block') {
+                    this.closeInstructionsModal();
+                }
+                if (this.levelModal && this.levelModal.style.display === 'block') {
+                    this.closeLevelModal();
+                }
             }
         });
     }
 
     startGame() {
         console.log("🚀 Iniciando juego...");
-        
-        // Animación de transición
+
+        this.loadSelectedLevel();
+
+        // Animación de transición (SIN CAMBIOS)
         this.playTransitionAnimation(() => {
             // Redirigir a la página del juego
             window.location.href = 'game.html';
-            
-            // O si prefieres cargar en la misma página:
-            // this.hideHome();
-            // this.showGame();
         });
     }
 
     selectLevel() {
-        console.log("📊 Seleccionar nivel - Función en desarrollo");
-        // Aquí puedes implementar la selección de niveles
-        alert('🎮 Sistema de niveles en desarrollo. Por ahora inicia el juego básico.');
+        console.log("📊 Mostrando selector de nivel");
+
+        if (!this.levelModal) return;
+        // Asegura que se muestre el nivel actualmente seleccionado antes de abrir
+        this.loadSelectedLevel();
+
+        this.levelModal.style.display = 'block';
+
+        // Animación de entrada
+        setTimeout(() => {
+            const modalContent = this.levelModal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.style.transform = 'translateY(0)';
+                modalContent.style.opacity = '1';
+            }
+        }, 10);
     }
 
     showInstructions() {
         console.log("❓ Mostrando instrucciones");
-        this.modal.style.display = 'block';
-        
+        if (!this.instructionsModal) return; // Salir si el modal no existe
+
+        this.instructionsModal.style.display = 'block';
+
         // Animación de entrada
         setTimeout(() => {
-            this.modal.querySelector('.modal-content').style.transform = 'translateY(0)';
-            this.modal.querySelector('.modal-content').style.opacity = '1';
+            const modalContent = this.instructionsModal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.style.transform = 'translateY(0)';
+                modalContent.style.opacity = '1';
+            }
         }, 10);
+
     }
 
-    closeModal() {
-        const modalContent = this.modal.querySelector('.modal-content');
-        modalContent.style.transform = 'translateY(-20px)';
-        modalContent.style.opacity = '0';
-        
-        setTimeout(() => {
-            this.modal.style.display = 'none';
-        }, 300);
+    closeInstructionsModal() {
+        if (!this.instructionsModal) return;
+
+        const modalContent = this.instructionsModal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.style.transform = 'translateY(-20px)';
+            modalContent.style.opacity = '0';
+
+            setTimeout(() => {
+                this.instructionsModal.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    closeLevelModal() {
+        if (!this.levelModal) return;
+
+        const modalContent = this.levelModal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.style.transform = 'translateY(-20px)';
+            modalContent.style.opacity = '0';
+
+            setTimeout(() => {
+                this.levelModal.style.display = 'none';
+
+                modalContent.style.transform = 'translateY(0)';
+                modalContent.style.opacity = '1';
+            }, 300);
+        } else {
+            this.levelModal.style.display = 'none';
+        }
     }
 
     playTransitionAnimation(callback) {
         const homeContainer = document.getElementById('home-container');
-        
+        if (!homeContainer) {
+            if (callback) callback();
+            return; // Salir si el contenedor no existe
+        }
+
         // Efecto de desvanecimiento
         homeContainer.style.opacity = '0';
         homeContainer.style.transform = 'scale(0.9)';
         homeContainer.style.transition = 'all 0.5s ease';
-        
+
         setTimeout(() => {
             if (callback) callback();
         }, 500);
@@ -103,7 +236,10 @@ class HomeManager {
 
     // Métodos para mostrar/ocultar home y juego en la misma página
     hideHome() {
-        document.getElementById('home-container').style.display = 'none';
+        const homeContainer = document.getElementById('home-container');
+        if (homeContainer) {
+            homeContainer.style.display = 'none';
+        }
     }
 
     showGame() {
@@ -112,7 +248,7 @@ class HomeManager {
         const gameContainer = document.getElementById('game-container');
         if (gameContainer) {
             gameContainer.style.display = 'block';
-            
+
             // Inicializar el juego
             import('./game.js').then(module => {
                 const GameManager = module.default;

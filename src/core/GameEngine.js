@@ -36,6 +36,8 @@ class GameEngine {
       "mini-dragon": 140,
     };
 
+    this.currentLevel = this.loadSelectedLevel();
+
     // Towers
     this.towerManager = new TowerManager();
     this.placementMode = false;
@@ -53,6 +55,12 @@ class GameEngine {
   // Alias por si alguien llama render() en vez de draw()
   render() { this.draw(); }
 
+  // método para cargar el nivel seleccionado
+  loadSelectedLevel() {
+    const level = localStorage.getItem('selectedLevel');
+    return level ? parseInt(level) : 1; // Por defecto nivel 1
+  }
+
   // ⏸️ Usa #pause-overlay y #pause-btn + clase .hidden
   togglePause() {
     this.isPaused = !this.isPaused;
@@ -69,17 +77,17 @@ class GameEngine {
   // 🔗 Engancha botones/teclas de la UI (idempotente)
   connectUIControls() {
     if (this._uiWired) return; // no registrar dos veces
-    const pauseBtn  = document.getElementById("pause-btn");
+    const pauseBtn = document.getElementById("pause-btn");
     const resumeBtn = document.getElementById("resume-btn");
     const restartBtn = document.getElementById("restart-btn");
     const quitBtn = document.getElementById("quit-btn");
 
-    if (pauseBtn)  pauseBtn.addEventListener("click", () => this.togglePause(), { once: false });
+    if (pauseBtn) pauseBtn.addEventListener("click", () => this.togglePause(), { once: false });
     if (resumeBtn) resumeBtn.addEventListener("click", () => { if (this.isPaused) this.togglePause(); }, { once: false });
 
     // opcionales
     if (restartBtn) restartBtn.addEventListener("click", () => { /* this.restart?.(); */ if (this.isPaused) this.togglePause(); });
-    if (quitBtn)    quitBtn.addEventListener("click", () => { /* this.goToMenu?.(); */ if (this.isPaused) this.togglePause(); });
+    if (quitBtn) quitBtn.addEventListener("click", () => { /* this.goToMenu?.(); */ if (this.isPaused) this.togglePause(); });
 
     // Atajo de teclado: P para pausar/reanudar
     window.addEventListener("keydown", (e) => {
@@ -137,6 +145,8 @@ class GameEngine {
       await this.assetLoader.loadGameAssets();
       this.setupWaves();
 
+      this.updateUI();
+
       // Configurar eventos de mouse del canvas DESPUÉS de crearlo
       this._attachCanvasHandlers();
 
@@ -159,11 +169,11 @@ class GameEngine {
     const loadingDiv = document.createElement("div");
     loadingDiv.id = "loading-message";
     loadingDiv.style.cssText = `
-      position: absolute; top: 50%; left: 50%; 
-      transform: translate(-50%, -50%); 
-      color: white; font-size: 20px; 
-      text-align: center; z-index: 100;
-    `;
+      position: absolute; top: 50%; left: 50%; 
+      transform: translate(-50%, -50%); 
+      color: white; font-size: 20px; 
+      text-align: center; z-index: 100;
+    `;
     loadingDiv.textContent = "Cargando Tower Defense...";
     container.appendChild(loadingDiv);
   }
@@ -172,47 +182,176 @@ class GameEngine {
     const container = document.getElementById(this.containerId);
     const errorDiv = document.createElement("div");
     errorDiv.style.cssText = `
-      position: absolute; top: 50%; left: 50%; 
-      transform: translate(-50%, -50%); 
-      color: red; font-size: 16px; 
-      text-align: center; z-index: 100;
-    `;
+      position: absolute; top: 50%; left: 50%; 
+      transform: translate(-50%, -50%); 
+      color: red; font-size: 16px; 
+      text-align: center; z-index: 100;
+    `;
     errorDiv.textContent = "Error cargando recursos. Verifica la consola.";
     container.appendChild(errorDiv);
   }
 
   setupWaves() {
-    this.waves = [
-      {
-        name: "Oleada 1 - Básica",
-        cozys: [
-          { type: "monstruo", delay: 0 },
-          { type: "monstruo", delay: 2 },
-          { type: "monstruo", delay: 4 },
-        ],
-      },
-      {
-        name: "Oleada 2 - Velocidad",
-        cozys: [
-          { type: "monstruo", delay: 0 },
-          { type: "demonio", delay: 2 },
-          { type: "monstruo", delay: 4 },
-          { type: "demonio", delay: 6 },
-          { type: "mini-dragon", delay: 8 },
-        ],
-      },
-      {
-        name: "Oleada 3 - Mixta",
-        cozys: [
-          { type: "monstruo", delay: 0 },
-          { type: "demonio", delay: 2 },
-          { type: "genio", delay: 4 },
-          { type: "dragon", delay: 6 },
-          { type: "mini-dragon", delay: 8 },
-          { type: "monstruo", delay: 10 },
-        ],
-      },
-    ];
+    console.log(`🎮 Configurando oleadas para Nivel ${this.currentLevel}`);
+
+    if (this.currentLevel === 1) {
+      // NIVEL 1 - Fácil (3 oleadas)
+      this.waves = [
+        {
+          name: "Oleada 1 - Introducción",
+          cozys: [
+            { type: "monstruo", delay: 0 },
+            { type: "monstruo", delay: 2 },
+            { type: "monstruo", delay: 4 },
+          ],
+        },
+        {
+          name: "Oleada 2 - Velocidad",
+          cozys: [
+            { type: "monstruo", delay: 0 },
+            { type: "demonio", delay: 2 },
+            { type: "monstruo", delay: 4 },
+            { type: "demonio", delay: 6 },
+            { type: "mini-dragon", delay: 8 },
+          ],
+        },
+        {
+          name: "Oleada 3 - Desafío Final",
+          cozys: [
+            { type: "monstruo", delay: 0 },
+            { type: "demonio", delay: 2 },
+            { type: "mini-dragon", delay: 4 },
+            { type: "monstruo", delay: 6 },
+            { type: "mini-dragon", delay: 8 },
+          ],
+        },
+      ];
+
+      // Configuración inicial para nivel 1
+      this.playerHealth = 100;
+      this.gold = 110;
+
+      // Establecer ruta 1 (Correcto para Nivel 1)
+      this.pathManager.setCurrent('ruta1');
+
+    } else if (this.currentLevel === 2) {
+
+      // NIVEL 2 - Difícil (5 oleadas)
+      this.waves = [
+        {
+          name: "Oleada 1 - Calentamiento Rápido",
+          cozys: [
+            { type: "demonio", delay: 0.1 },
+            { type: "demonio", delay: 0.2 },
+            { type: "genio", delay: 0.3 },
+            { type: "mini-dragon", delay: 0.4 },
+            { type: "monstruo", delay: 0.5 },
+            { type: "demonio", delay: 0.6 },
+          ], // Total 7
+        },
+        {
+          name: "Oleada 2 - Ataque Mixto",
+          cozys: [
+            { type: "genio", delay: 0 },
+            { type: "demonio", delay: 1.5 },
+            { type: "dragon", delay: 3 },
+            { type: "mini-dragon", delay: 4.5 },
+            { type: "dragon", delay: 6 },
+            { type: "genio", delay: 7.5 },
+            { type: "monstruo", delay: 9 },
+            { type: "mini-dragon", delay: 10.5 },
+            { type: "demonio", delay: 0.1 },
+            { type: "demonio", delay: 0.2 },
+            { type: "genio", delay: 0.3 },
+            { type: "mini-dragon", delay: 0.4 },
+          ], // Total 9
+        },
+        {
+          name: "Oleada 3 - Asalto de Dragones",
+          cozys: [
+            { type: "dragon", delay: 0 },
+            { type: "dragon", delay: 1.5 },
+            { type: "mini-dragon", delay: 3 },
+            { type: "mini-dragon", delay: 4.5 },
+            { type: "dragon", delay: 6 },
+            { type: "demonio", delay: 7.5 },
+            { type: "genio", delay: 9 },
+            { type: "dragon", delay: 10.5 },
+            { type: "demonio", delay: 0.1 },
+            { type: "demonio", delay: 0.2 },
+            { type: "genio", delay: 0.3 },
+            { type: "mini-dragon", delay: 0.4 },
+            { type: "monstruo", delay: 0.5 },
+          ], // Total 8
+        },
+        {
+          name: "Oleada 4 - El Muro de Tanques",
+          cozys: [
+            { type: "genio", delay: 0 },
+            { type: "dragon", delay: 1.5 },
+            { type: "genio", delay: 3 },
+            { type: "dragon", delay: 4.5 },
+            { type: "genio", delay: 6 },
+            { type: "dragon", delay: 7.5 },
+            { type: "dragon", delay: 9 },
+            { type: "demonio", delay: 0.1 },
+            { type: "demonio", delay: 0.2 },
+            { type: "genio", delay: 0.3 },
+            { type: "mini-dragon", delay: 0.4 },
+            { type: "monstruo", delay: 0.5 },
+            { type: "demonio", delay: 0.6 },
+          ], // Total 7
+        },
+        {
+          name: "Oleada 5 - Asalto Final",
+          cozys: [
+            { type: "dragon", delay: 0 },
+            { type: "mini-dragon", delay: 1 },
+            { type: "genio", delay: 2 },
+            { type: "demonio", delay: 3 },
+            { type: "dragon", delay: 4 },
+            { type: "mini-dragon", delay: 5 },
+            { type: "genio", delay: 6 },
+            { type: "dragon", delay: 7 },
+            { type: "dragon", delay: 8 },
+            { type: "demonio", delay: 9 },
+            { type: "genio", delay: 10 },
+            { type: "demonio", delay: 0.1 },
+            { type: "demonio", delay: 0.2 },
+            { type: "genio", delay: 0.3 },
+            { type: "mini-dragon", delay: 0.4 },
+            { type: "monstruo", delay: 0.5 },
+            { type: "demonio", delay: 0.6 },
+            { type: "genio", delay: 2 },
+            { type: "demonio", delay: 3 },
+            { type: "dragon", delay: 4 },
+            { type: "mini-dragon", delay: 5 },
+          ], // Total 11
+        },
+      ];
+
+
+      // Ajustar velocidades de enemigos según el nivel
+      if (this.currentLevel === 2) {
+        // Enemigos más rápidos en nivel 2
+        this.enemySpeed = {
+          monstruo: 200,
+          demonio: 200,
+          genio: 200,
+          dragon: 200,
+          "mini-dragon": 160,
+        };
+      }
+
+      // Configuración inicial para nivel 2
+      this.playerHealth = 75;
+      this.gold = 80; // Más oro inicial para el nivel difícil
+
+      // ⚠️ Se eliminó this.pathManager.setCurrent('ruta2'); 
+      // para permitir que _spawnCozy() elija aleatoriamente.
+    }
+
+
   }
 
   setupEventListeners() {
@@ -254,30 +393,51 @@ class GameEngine {
     }
   }
 
+  // src/core/GameEngine.js
+
   // Spawnea UN enemigo (objeto)
   _spawnCozy(cozyConfig) {
+    // 🔑 PASO 1: Elegir la ruta aleatoria (Lógica de bifurcación)
+    let routeName = "ruta1";
+    if (this.currentLevel === 2) {
+      // 50% de probabilidad de usar 'ruta1' o 'ruta2'
+      routeName = Math.random() < 0.5 ? 'ruta1' : 'ruta2';
+    }
+
+    // 🔑 PASO 2: OBTENER LOS PUNTOS EXACTOS DE LA RUTA ELEGIDA
+    // Se usa getPath() en lugar de getCurrentPath() para evitar errores de estado interno
+    const pathPoints = this.pathManager.getPath(routeName);
+
+    if (!pathPoints || pathPoints.length < 2) {
+      console.error(`[GameEngine] No se encontraron puntos para la ruta: ${routeName}`);
+      return; // Detiene la creación si la ruta no existe
+    }
+
     // 1) Entidad lógica (objeto Cozy)
     const cozy = new Cozy(
       cozyConfig.type,
-      this.pathManager.getCurrentPath(),
+      pathPoints, // 👈 Se le pasan los puntos DIRECTOS de la ruta aleatoria
       this.assetLoader
     );
     this.cozys.push(cozy);
-    this.cozyQueue.enqueue(cozy); // sigue usando tu cola circular
+    this.cozyQueue.enqueue(cozy);
+
+    // Opcional: Actualizar el PathManager con la última ruta usada
+    this.pathManager.setCurrent(routeName);
 
     // 2) Representación visual en Phaser (si está disponible)
     if (this.phaserGame) {
-      const routeName = this.pathManager.current || "ruta1";
       const speed = this.enemySpeed[cozyConfig.type] ?? 90;
 
+      // 👈 Se usa la ruta elegida para Phaser
       spawnEnemyOnPath(this.phaserGame, cozyConfig.type, routeName, {
         speed,
         scale:
           cozyConfig.type === "dragon"
             ? 1.2
             : cozyConfig.type === "mini-dragon"
-            ? 0.9
-            : 1,
+              ? 0.9
+              : 1,
         action: "walk",
       });
     }
@@ -298,12 +458,14 @@ class GameEngine {
     const wave = this.waves[this.currentWaveIndex];
     console.log(`🌊 Iniciando: ${wave.name}`);
 
+    const spawnIntervalMs = this.currentLevel === 2 ? 2000 : 6000;
+
     let i = 0;
     const spawnNext = () => {
       if (i >= wave.cozys.length) return; // terminó de programar esta oleada
       const cozyConfig = wave.cozys[i++];
       this._spawnCozy(cozyConfig); // crea 1 enemigo (objeto) y lo lanza
-      setTimeout(spawnNext, 6000); // espera 6s y crea el siguiente
+      setTimeout(spawnNext, spawnIntervalMs); // espera 6s y crea el siguiente
     };
 
     spawnNext();
@@ -424,7 +586,7 @@ class GameEngine {
         document
           .querySelectorAll(".tower-item.placing")
           .forEach((el) => el.classList.remove("placing"));
-      } catch (e) {}
+      } catch (e) { }
     });
 
     // move to update preview
@@ -456,21 +618,33 @@ class GameEngine {
             document
               .querySelectorAll(".tower-item.placing")
               .forEach((el) => el.classList.remove("placing"));
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     });
   }
 
   _getCostForType(type) {
+    // Costos base (Nivel 1)
+    let cost = 0;
     switch (type) {
       case "rapid":
-        return 75;
+        cost = 75;
+        break;
       case "powerful":
-        return 100;
+        cost = 100;
+        break;
       default:
-        return 50;
+        cost = 50;
+        break;
     }
+
+    // Aumentar el costo para el Nivel 2
+    if (this.currentLevel === 2) {
+      // Aumento del 40% en el costo para Nivel 2 (50*1.4 = 70)
+      return Math.round(cost * 1.4);
+    }
+    return cost;
   }
 
   gameLoop(currentTime) {
@@ -481,7 +655,7 @@ class GameEngine {
     // Si el juego no está en pausa, actualizar y renderizar
     if (!this.isPaused) {
       this.update(deltaTime); // Actualiza enemigos, torres, proyectiles, etc.
-      this.draw();            // Dibuja en el canvas
+      this.draw();            // Dibuja en el canvas
     }
     // Volver a llamar al siguiente frame
     requestAnimationFrame(this.gameLoop.bind(this));
@@ -519,6 +693,9 @@ class GameEngine {
     const activeEnemies = this.cozys.filter(
       (cozy) => cozy.isActive && cozy.state !== "death"
     );
+
+    const damageMultiplier = this.currentLevel === 2 ? 0.001 : 1;
+    const goldMultiplier = this.currentLevel === 2 ? 0.10 : 1;
 
     towers.forEach((tower) => {
       const result = tower.update(activeEnemies, currentTime);
@@ -582,24 +759,24 @@ class GameEngine {
     const victoryDiv = document.createElement("div");
     victoryDiv.id = "victory-message";
     victoryDiv.style.cssText = `
-      position: absolute; top: 50%; left: 50%; 
-      transform: translate(-50%, -50%); 
-      background: linear-gradient(135deg, #4CAF50, #45a049);
-      color: white; font-size: 24px; font-weight: bold;
-      text-align: center; z-index: 200;
-      padding: 30px; border-radius: 15px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      border: 3px solid #FFD700;
-    `;
+      position: absolute; top: 50%; left: 50%; 
+      transform: translate(-50%, -50%); 
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white; font-size: 24px; font-weight: bold;
+      text-align: center; z-index: 200;
+      padding: 30px; border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      border: 3px solid #FFD700;
+    `;
     victoryDiv.innerHTML = `
-      <div style="font-size: 32px; margin-bottom: 10px;">🏆</div>
-      <div>¡FELICITACIONES!</div>
-      <div style="font-size: 18px; margin-top: 10px;">Has defendido exitosamente</div>
-      <div style="font-size: 18px;">contra todas las oleadas</div>
-      <div style="font-size: 16px; margin-top: 15px; color: #FFD700;">
-        Puntuación Final: ${this.score} | Oro: ${this.gold}
-      </div>
-    `;
+      <div style="font-size: 32px; margin-bottom: 10px;">🏆</div>
+      <div>¡FELICITACIONES!</div>
+      <div style="font-size: 18px; margin-top: 10px;">Has defendido exitosamente</div>
+      <div style="font-size: 18px;">contra todas las oleadas</div>
+      <div style="font-size: 16px; margin-top: 15px; color: #FFD700;">
+        Puntuación Final: ${this.score} | Oro: ${this.gold}
+      </div>
+    `;
     container.appendChild(victoryDiv);
   }
 
@@ -608,23 +785,23 @@ class GameEngine {
     const gameOverDiv = document.createElement("div");
     gameOverDiv.id = "gameover-message";
     gameOverDiv.style.cssText = `
-      position: absolute; top: 50%; left: 50%; 
-      transform: translate(-50%, -50%); 
-      background: linear-gradient(135deg, #f44336, #d32f2f);
-      color: white; font-size: 24px; font-weight: bold;
-      text-align: center; z-index: 200;
-      padding: 30px; border-radius: 15px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      border: 3px solid #ff5722;
-    `;
+      position: absolute; top: 50%; left: 50%; 
+      transform: translate(-50%, -50%); 
+      background: linear-gradient(135deg, #f44336, #d32f2f);
+      color: white; font-size: 24px; font-weight: bold;
+      text-align: center; z-index: 200;
+      padding: 30px; border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      border: 3px solid #ff5722;
+    `;
     gameOverDiv.innerHTML = `
-      <div style="font-size: 32px; margin-bottom: 10px;">💀</div>
-      <div>GAME OVER</div>
-      <div style="font-size: 18px; margin-top: 10px;">Tu base ha sido destruida</div>
-      <div style="font-size: 16px; margin-top: 15px; color: #ffcdd2;">
-        Puntuación: ${this.score} | Oleada: ${this.currentWaveIndex}/${this.waves.length}
-      </div>
-    `;
+      <div style="font-size: 32px; margin-bottom: 10px;">💀</div>
+      <div>GAME OVER</div>
+      <div style="font-size: 18px; margin-top: 10px;">Tu base ha sido destruida</div>
+      <div style="font-size: 16px; margin-top: 15px; color: #ffcdd2;">
+        Puntuación: ${this.score} | Oleada: ${this.currentWaveIndex}/${this.waves.length}
+      </div>
+    `;
     container.appendChild(gameOverDiv);
   }
 
@@ -666,7 +843,35 @@ class GameEngine {
   updateUI() {
     document.getElementById("health").textContent = this.playerHealth;
     document.getElementById("gold").textContent = this.gold;
-    document.getElementById("wave").textContent = `${this.currentWaveIndex}/${this.waves.length}`;
+
+    // 🔑 CORRECCIÓN: Actualizar los costos de las torres en la UI
+    document.querySelectorAll(".towers-list .tower-item").forEach((item) => {
+      const towerType = item.getAttribute("data-tower");
+      const costElement = item.querySelector(".tower-cost");
+
+      if (costElement) {
+        // Obtiene el costo real (70 para basic tower en Nivel 2)
+        costElement.textContent = this._getCostForType(towerType);
+      }
+    });
+
+
+    const levelDisplay = document.getElementById("current-level");
+    if (levelDisplay) {
+      levelDisplay.textContent = this.currentLevel;
+    }
+
+    const totalWaves = this.waves.length;
+    document.getElementById("wave").textContent = `${this.currentWaveIndex}/${totalWaves}`;
+
+    if (this.currentLevel === 2) {
+      // Nivel 2 tiene 5 oleadas
+      document.getElementById("wave").textContent = `${this.currentWaveIndex}/5`;
+    } else {
+      // Nivel 1 tiene 3 oleadas
+      document.getElementById("wave").textContent = `${this.currentWaveIndex}/3`;
+    }
+
 
     // Actualizar estados de botones undo/redo
     document.getElementById("undo-btn").disabled =
