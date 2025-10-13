@@ -330,3 +330,56 @@ body {
   position: relative;
   z-index: 1100;
 }
+/* Overlay base */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,.45);
+  z-index: 200;
+}
+.overlay.hidden { display: none; }
+
+/* Tarjeta del overlay */
+.overlay-card {
+  min-width: 340px;
+  max-width: 90vw;
+  padding: 28px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: #fff;
+  text-align: center;
+  border: 3px solid #FFD700;
+  box-shadow: 0 8px 32px rgba(0,0,0,.35);
+}
+.overlay-emoji { font-size: 32px; margin-bottom: 8px; }
+.overlay-title { font-size: 28px; margin: 0 0 8px 0; }
+.overlay-sub { font-size: 18px; margin: 2px 0; }
+
+/* Tarjeta interna de stats */
+.stats-card {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.35);
+  border: 2px solid #FFD700;
+  text-align: left;
+}
+.stats-label { font-size: 14px; opacity: .9; }
+.stats-value { font-size: 26px; line-height: 1; margin-top: 4px; }
+.stats-extra { font-size: 14px; margin-top: 10px; opacity: .95; }
+
+/* Botón */
+.overlay-btn {
+  cursor: pointer;
+  margin-top: 18px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #FFD700;
+  color: #1b1b1b;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+}

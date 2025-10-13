@@ -734,9 +734,8 @@ class GameEngine {
 
     // Victoria cuando no hay más oleadas ni enemigos
     if (
-      this.cozys.length === 0 &&
-      this.currentWaveIndex >= this.waves.length &&
-      !document.getElementById("victory-message")
+      this.currentWaveIndex >= this.waves.length && 
+      this.cozys.every(cozy => !cozy.isActive) // ✅ todos los enemigos eliminados
     ) {
       console.log("🎉 ¡VICTORIA COMPLETA! Todas las oleadas derrotadas");
       this.showVictoryMessage();
@@ -755,55 +754,31 @@ class GameEngine {
   }
 
   showVictoryMessage() {
-    const container = document.getElementById(this.containerId);
-    const victoryDiv = document.createElement("div");
-    victoryDiv.id = "victory-message";
-    victoryDiv.style.cssText = `
-      position: absolute; top: 50%; left: 50%; 
-      transform: translate(-50%, -50%); 
-      background: linear-gradient(135deg, #4CAF50, #45a049);
-      color: white; font-size: 24px; font-weight: bold;
-      text-align: center; z-index: 200;
-      padding: 30px; border-radius: 15px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      border: 3px solid #FFD700;
-    `;
-    victoryDiv.innerHTML = `
-      <div style="font-size: 32px; margin-bottom: 10px;">🏆</div>
-      <div>¡FELICITACIONES!</div>
-      <div style="font-size: 18px; margin-top: 10px;">Has defendido exitosamente</div>
-      <div style="font-size: 18px;">contra todas las oleadas</div>
-      <div style="font-size: 16px; margin-top: 15px; color: #FFD700;">
-        Puntuación Final: ${this.score} | Oro: ${this.gold}
-      </div>
-    `;
-    container.appendChild(victoryDiv);
-  }
+  const modal = document.getElementById("victory-modal");
+  const scoreNode = document.getElementById("victory-score");
+  const goldNode = document.getElementById("victory-gold");
+  const btnClose = document.getElementById("victory-close");
 
-  showGameOverMessage() {
-    const container = document.getElementById(this.containerId);
-    const gameOverDiv = document.createElement("div");
-    gameOverDiv.id = "gameover-message";
-    gameOverDiv.style.cssText = `
-      position: absolute; top: 50%; left: 50%; 
-      transform: translate(-50%, -50%); 
-      background: linear-gradient(135deg, #f44336, #d32f2f);
-      color: white; font-size: 24px; font-weight: bold;
-      text-align: center; z-index: 200;
-      padding: 30px; border-radius: 15px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      border: 3px solid #ff5722;
-    `;
-    gameOverDiv.innerHTML = `
-      <div style="font-size: 32px; margin-bottom: 10px;">💀</div>
-      <div>GAME OVER</div>
-      <div style="font-size: 18px; margin-top: 10px;">Tu base ha sido destruida</div>
-      <div style="font-size: 16px; margin-top: 15px; color: #ffcdd2;">
-        Puntuación: ${this.score} | Oleada: ${this.currentWaveIndex}/${this.waves.length}
-      </div>
-    `;
-    container.appendChild(gameOverDiv);
+  if (!modal || !scoreNode || !goldNode) return;
+
+  // Rellenar datos
+  scoreNode.textContent = this.score;
+  goldNode.textContent = this.gold;
+
+  // Mostrar modal
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+
+  // Cerrar (opcional: puedes reiniciar juego aquí si quieres)
+  if (btnClose) {
+    btnClose.onclick = () => {
+      modal.classList.add("hidden");
+      modal.setAttribute("aria-hidden", "true");
+      // this.restartGame(); // <- si quieres reiniciar
+    };
   }
+}
+
 
   drawBackground(ctx) {
     // Phaser maneja el fondo ahora
@@ -843,6 +818,9 @@ class GameEngine {
   updateUI() {
     document.getElementById("health").textContent = this.playerHealth;
     document.getElementById("gold").textContent = this.gold;
+
+    const scoreEl = document.getElementById("score-value");
+    if (scoreEl) scoreEl.textContent = this.score;
 
     // 🔑 CORRECCIÓN: Actualizar los costos de las torres en la UI
     document.querySelectorAll(".towers-list .tower-item").forEach((item) => {

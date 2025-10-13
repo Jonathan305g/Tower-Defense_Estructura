@@ -131,6 +131,27 @@
     window.game = engine;         // útil para depurar en consola
     await engine.init();          // dentro de init() ya se llama a connectUIControls()
   </script>
+  <!-- ===== Modal de Victoria ===== -->
+<div id="victory-modal" class="overlay hidden" aria-hidden="true">
+  <div class="overlay-card">
+    <div class="overlay-emoji" aria-hidden="true">🏆</div>
+    <h2 class="overlay-title">¡FELICITACIONES!</h2>
+    <p class="overlay-sub">Has defendido exitosamente</p>
+    <p class="overlay-sub">contra todas las oleadas</p>
+
+    <!-- Tarjeta de estadísticas -->
+    <div class="stats-card">
+      <div class="stats-label">Puntuación Final</div>
+      <div id="victory-score" class="stats-value">0</div>
+      <div class="stats-extra">Oro: <strong id="victory-gold">0</strong></div>
+    </div>
+
+    <button id="victory-close" class="overlay-btn" type="button">
+      Continuar
+    </button>
+  </div>
+</div>
+
 </body>
 
 </html>
